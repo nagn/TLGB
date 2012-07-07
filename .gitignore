@@ -1,0 +1,17 @@
+*.pyc
+*.pyo
+*.pyd
+*.*~
+*.pyd
+*.so
+*.dll
+*.o
+*komodo*
+build/*
+dist/*
+*game_profile*
+*profile.txt*
+*_cfg.json
+*.bat
+*.komodotools
+*.komodoproject
