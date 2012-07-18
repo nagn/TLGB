@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>836</width>
+    <width>880</width>
     <height>601</height>
    </rect>
   </property>
@@ -15,6 +15,9 @@
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -30,209 +33,69 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QWidget" name="verticalLayoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QScrollArea" name="scrollArea">
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_3">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>389</width>
-               <height>432</height>
-              </rect>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_2">
-              <item row="0" column="0">
-               <widget class="QLabel" name="mappreview">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="layoutDirection">
-                 <enum>Qt::LeftToRight</enum>
-                </property>
-                <property name="text">
-                 <string>Please Load Map</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QPushButton" name="reset">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="whatsThis">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;hello&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="autoFillBackground">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>=</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QPushButton" name="enlarge">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="focusPolicy">
-                 <enum>Qt::StrongFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;lopl&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>+</string>
-                </property>
-                <property name="default">
-                 <bool>false</bool>
-                </property>
-                <property name="flat">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="shrink">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>-</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="verticalLayout"/>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget_2">
        <layout class="QVBoxLayout" name="verticalLayout_6">
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <widget class="QComboBox" name="comboBox">
+          <property name="statusTip">
+           <string>Select the Game Mode</string>
+          </property>
           <item>
-           <widget class="QComboBox" name="comboBox">
-            <property name="statusTip">
-             <string>Select the Game Mode</string>
-            </property>
-            <item>
-             <property name="text">
-              <string extracomment="Capture the Flag">CTF</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string extracomment="Control Points">CP</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string extracomment="Arena">Arena</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string extracomment="Dual King of the Hill">Dkoth</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string extracomment="King of the Hill">Koth</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string extracomment="Generator">Generator</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string/>
-             </property>
-            </item>
-           </widget>
+           <property name="text">
+            <string extracomment="Capture the Flag">CTF</string>
+           </property>
           </item>
-         </layout>
+          <item>
+           <property name="text">
+            <string extracomment="Control Points">CP</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string extracomment="Arena">Arena</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string extracomment="Dual King of the Hill">Dkoth</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string extracomment="King of the Hill">Koth</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string extracomment="Generator">Generator</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string/>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
-         <widget class="QScrollArea" name="scrollArea_2">
+         <widget class="QScrollArea" name="scrollAreaEntity">
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_2">
+          <widget class="QWidget" name="scrollAreaWidgetContents">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>397</width>
-             <height>485</height>
+             <width>275</width>
+             <height>512</height>
             </rect>
            </property>
-           <widget class="QLabel" name="label">
-            <property name="geometry">
-             <rect>
-              <x>25</x>
-              <y>180</y>
-              <width>121</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Please Load Entities</string>
-            </property>
-           </widget>
-           <zorder>verticalSpacer</zorder>
-           <zorder>verticalSpacer</zorder>
-           <zorder>label</zorder>
           </widget>
          </widget>
         </item>
@@ -240,31 +103,14 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QToolButton" name="toolButton">
-      <property name="text">
-       <string>Save</string>
-      </property>
-     </widget>
-    </item>
    </layout>
-   <zorder></zorder>
-   <zorder></zorder>
-   <zorder>comboBox</zorder>
-   <zorder></zorder>
-   <zorder>scrollArea</zorder>
-   <zorder>scrollArea</zorder>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>verticalLayoutWidget_2</zorder>
-   <zorder>splitter</zorder>
-   <zorder>toolButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>836</width>
+     <width>880</width>
      <height>21</height>
     </rect>
    </property>
