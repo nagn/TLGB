@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>880</width>
-    <height>601</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,11 +32,14 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="verticalLayoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout"/>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget_2">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
+       <layout class="QVBoxLayout" name="verticalLayoutEntity">
         <property name="bottomMargin">
          <number>0</number>
         </property>
@@ -82,23 +85,6 @@
           </item>
          </widget>
         </item>
-        <item>
-         <widget class="QScrollArea" name="scrollAreaEntity">
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>275</width>
-             <height>512</height>
-            </rect>
-           </property>
-          </widget>
-         </widget>
-        </item>
        </layout>
       </widget>
      </widget>
@@ -110,7 +96,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>880</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>

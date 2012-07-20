@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GarrisonBuilder.ui'
 #
-# Created: Tue Jul 17 18:32:58 2012
+# Created: Thu Jul 19 17:10:42 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_MapEditor(object):
     def setupUi(self, MapEditor):
         MapEditor.setObjectName(_fromUtf8("MapEditor"))
-        MapEditor.resize(880, 601)
+        MapEditor.resize(800, 600)
         MapEditor.setLayoutDirection(QtCore.Qt.LeftToRight)
         MapEditor.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         self.centralwidget = QtGui.QWidget(MapEditor)
@@ -31,6 +31,7 @@ class Ui_MapEditor(object):
         sizePolicy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
         self.splitter.setSizePolicy(sizePolicy)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter.setChildrenCollapsible(False)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
@@ -39,9 +40,9 @@ class Ui_MapEditor(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
-        self.verticalLayout_6 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.verticalLayout_6.setContentsMargins(-1, -1, -1, 0)
-        self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
+        self.verticalLayoutEntity = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayoutEntity.setContentsMargins(-1, -1, -1, 0)
+        self.verticalLayoutEntity.setObjectName(_fromUtf8("verticalLayoutEntity"))
         self.comboBox = QtGui.QComboBox(self.verticalLayoutWidget_2)
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
         self.comboBox.addItem(_fromUtf8(""))
@@ -52,19 +53,11 @@ class Ui_MapEditor(object):
         self.comboBox.addItem(_fromUtf8(""))
         self.comboBox.addItem(_fromUtf8(""))
         self.comboBox.setItemText(6, _fromUtf8(""))
-        self.verticalLayout_6.addWidget(self.comboBox)
-        self.scrollAreaEntity = QtGui.QScrollArea(self.verticalLayoutWidget_2)
-        self.scrollAreaEntity.setWidgetResizable(True)
-        self.scrollAreaEntity.setObjectName(_fromUtf8("scrollAreaEntity"))
-        self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 275, 512))
-        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
-        self.scrollAreaEntity.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout_6.addWidget(self.scrollAreaEntity)
+        self.verticalLayoutEntity.addWidget(self.comboBox)
         self.gridLayout.addWidget(self.splitter, 1, 0, 1, 1)
         MapEditor.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MapEditor)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 880, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setDefaultUp(False)
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
