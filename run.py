@@ -1,11 +1,9 @@
-#!/usr/bin/python -d
- 
+#!/usr/bin/env python
 import sys, os
 import glob
-import constants
+import constants, json_handler
 from PyQt4 import QtCore, QtGui
 from TLGB import Ui_MapEditor
-
 
 class MyForm(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -56,7 +54,7 @@ class MyForm(QtGui.QMainWindow):
         self.entityGrid = QtGui.QGridLayout()
         
         #Get all the entities in the folder, generate entities, and put them in a list!
-        path = 'icons/every'
+        path = 'icons/entities'
         self.entitityList = []
         for iteration, entityIcon in enumerate(glob.glob( os.path.join(path, '*.png'))):
             newEntity = EntityLabel(os.path.basename(entityIcon), self)
@@ -78,6 +76,8 @@ class MyForm(QtGui.QMainWindow):
         self.add_toolbar('icons\gb\expand.png', 'Zoom In', self.scale_up, QtGui.QKeySequence.ZoomIn)
         self.add_toolbar('icons\gb\equal.png', 'Zoom Reset', self.scale_reset)
 
+        #load entities, and stuff... I guess???
+        json_handler.JsonHandler()
     def load_map (self, map_directory):
         #We create a QImage in order to fetch map information
         img = QtGui.QImage(self.map_directory)
@@ -140,7 +140,7 @@ class EntityLabel (QtGui.QLabel):
         self.setMouseTracking(True)
         
         #icon for entity
-        img = QtGui.QImage(os.path.join('icons/every', str(icon)))
+        img = QtGui.QImage(os.path.join('icons/entities', str(icon)))
         width = img.width()
         height = img.height()
         icon = QtGui.QPixmap.fromImage(img)
@@ -209,7 +209,7 @@ class ScrollAreaEntity (QtGui.QScrollArea):
         #update the scroll area
         self.form.containerWidget.setLayout(self.form.entityGrid)
         self.form.ui.scrollAreaEntity.setWidget(self.form.containerWidget)
-
+        
 if __name__ == "__main__":
   app = QtGui.QApplication(sys.argv)
   myapp = MyForm()

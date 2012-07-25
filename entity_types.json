@@ -1,0 +1,58 @@
+{
+    "categories": [
+        {
+            "name": "Control Points", 
+            "types": [
+                {
+                    "mapImage": "controlpoint_1.png", 
+                    "name": "controlpoint_1", 
+                    "humanReadableName": "Control Point 1", 
+                    "mapImageOrigin": {
+                        "y": 0, 
+                        "x": 0
+                    }, 
+                    "gbImage": "controlpoint_1.png", 
+                    "id": "controlpoint_1"
+                }, 
+                {
+                    "mapImage": "controlpoint_2.png", 
+                    "name": "controlpoint_2", 
+                    "humanReadableName": "Control Point 2", 
+                    "mapImageOrigin": {
+                        "y": 0, 
+                        "x": 0
+                    }, 
+                    "gbImage": "controlpoint_2.png", 
+                    "id": "controlpoint_2"
+                }
+            ]
+        }, 
+        {
+            "name": "Spawn points", 
+            "types": [
+                {
+                    "mapImage": "spawn_point_red.png", 
+                    "name": "spawn_point_red", 
+                    "humanReadableName": "Red Spawn", 
+                    "mapImageOrigin": {
+                        "y": 40, 
+                        "x": 29
+                    }, 
+                    "gbImage": "spawn_point_red.png", 
+                    "id": "spawn_red"
+                }, 
+                {
+                    "mapImage": "spawn_point_blue.png", 
+                    "name": "spawn_point_blue", 
+                    "humanReadableName": "Blue Spawn", 
+                    "mapImageOrigin": {
+                        "y": 40, 
+                        "x": 29
+                    }, 
+                    "gbImage": "spawn_point_blue.png", 
+                    "id": "spawn_blue"
+                }
+            ]
+        }
+    ]
+}
