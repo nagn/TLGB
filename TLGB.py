@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GarrisonBuilder.ui'
 #
-# Created: Thu Jul 19 17:10:42 2012
+# Created: Wed Jul 25 20:23:21 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,17 +43,6 @@ class Ui_MapEditor(object):
         self.verticalLayoutEntity = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayoutEntity.setContentsMargins(-1, -1, -1, 0)
         self.verticalLayoutEntity.setObjectName(_fromUtf8("verticalLayoutEntity"))
-        self.comboBox = QtGui.QComboBox(self.verticalLayoutWidget_2)
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.setItemText(6, _fromUtf8(""))
-        self.verticalLayoutEntity.addWidget(self.comboBox)
         self.gridLayout.addWidget(self.splitter, 1, 0, 1, 1)
         MapEditor.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MapEditor)
@@ -124,13 +113,6 @@ class Ui_MapEditor(object):
 
     def retranslateUi(self, MapEditor):
         MapEditor.setWindowTitle(QtGui.QApplication.translate("MapEditor", "Garrison Builder", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setStatusTip(QtGui.QApplication.translate("MapEditor", "Select the Game Mode", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(0, QtGui.QApplication.translate("MapEditor", "CTF", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(1, QtGui.QApplication.translate("MapEditor", "CP", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(2, QtGui.QApplication.translate("MapEditor", "Arena", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(3, QtGui.QApplication.translate("MapEditor", "Dkoth", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(4, QtGui.QApplication.translate("MapEditor", "Koth", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox.setItemText(5, QtGui.QApplication.translate("MapEditor", "Generator", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MapEditor", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MapEditor", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MapEditor", "View", None, QtGui.QApplication.UnicodeUTF8))

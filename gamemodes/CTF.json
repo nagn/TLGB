@@ -1,0 +1,11 @@
+{
+    "entities": [
+    ],
+    "categories" : [
+        "Walls",
+        "Floors",
+        "Intelligence",
+        "Kill Boxes",
+        "Spawn points"
+    ]
+}

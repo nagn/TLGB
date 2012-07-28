@@ -43,48 +43,6 @@
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <item>
-         <widget class="QComboBox" name="comboBox">
-          <property name="statusTip">
-           <string>Select the Game Mode</string>
-          </property>
-          <item>
-           <property name="text">
-            <string extracomment="Capture the Flag">CTF</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string extracomment="Control Points">CP</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string extracomment="Arena">Arena</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string extracomment="Dual King of the Hill">Dkoth</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string extracomment="King of the Hill">Koth</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string extracomment="Generator">Generator</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string/>
-           </property>
-          </item>
-         </widget>
-        </item>
        </layout>
       </widget>
      </widget>

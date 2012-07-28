@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+from __future__ import print_function, division
 import sys, os
 import glob
 import constants, json_handler
 from PyQt4 import QtCore, QtGui
 from TLGB import Ui_MapEditor
-
+import wizard
 class MyForm(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -13,7 +14,10 @@ class MyForm(QtGui.QMainWindow):
         
         #The current executing directory of the python script
         self.directory = sys.path[0]
-        self.map_directory = self.directory + "/sprites/montane/montane.png"
+        self.map_directory = os.path.join(self.directory , "sprites/montane/montane.png")
+        
+        #Load the default configuration (All entity types)
+        self.entityTypes = json_handler.generate_all_entities()
         
         #Generate the Scroll Area of the Map Previewer
         self.ui.scrollAreaMap = ScrollAreaMap(self)
@@ -24,6 +28,10 @@ class MyForm(QtGui.QMainWindow):
         self.ui.scrollBarVertical = QtGui.QScrollBar()
         self.ui.scrollAreaMap.setHorizontalScrollBar(self.ui.scrollBarHorizontal)
         self.ui.scrollAreaMap.setVerticalScrollBar(self.ui.scrollBarVertical)
+        
+        #Create the gamemode selecting comboBox before the scroll area, so it is on top
+        self.gamemodeSelector = GamemodeSelector(self)
+        self.ui.verticalLayoutEntity.addWidget(self.gamemodeSelector)
         
         #Generate the Scroll Area of the Entity Browser
         self.ui.scrollAreaEntity = ScrollAreaEntity(self)
@@ -38,7 +46,6 @@ class MyForm(QtGui.QMainWindow):
         self.mapWidth, self.mapHeight, mapImage = self.load_map(self.map_directory)
         
         #Lets save the img for later use
-        
         self.mapImage = mapImage
         
         #Convert the QImage into QPixmap
@@ -52,14 +59,6 @@ class MyForm(QtGui.QMainWindow):
         
         #Create the Entity Grid
         self.entityGrid = QtGui.QGridLayout()
-        
-        #Get all the entities in the folder, generate entities, and put them in a list!
-        path = 'icons/entities'
-        self.entitityList = []
-        for iteration, entityIcon in enumerate(glob.glob( os.path.join(path, '*.png'))):
-            newEntity = EntityLabel(os.path.basename(entityIcon), self)
-            self.entitityList.append(newEntity)
-            self.entityGrid.addWidget(newEntity, iteration, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
         #Create a dummy widget for us to easily to set to the grid Layout
         self.containerWidget = QtGui.QWidget()
@@ -75,13 +74,42 @@ class MyForm(QtGui.QMainWindow):
         self.add_toolbar('icons\gb\shrink.png', 'Zoom Out', self.scale_down, QtGui.QKeySequence.ZoomOut)
         self.add_toolbar('icons\gb\expand.png', 'Zoom In', self.scale_up, QtGui.QKeySequence.ZoomIn)
         self.add_toolbar('icons\gb\equal.png', 'Zoom Reset', self.scale_reset)
-
-        #load entities, and stuff... I guess???
-        json_handler.JsonHandler()
+        
+        #Load all the json files in constants.GAMEMOES_PATH
+        self.gamemodeList = []
+        for gamemode in(glob.glob( os.path.join(constants.GAMEMODES_PATH, '*.json'))):
+            self.gamemodeList.append(os.path.splitext(os.path.basename(gamemode))[0])
+        self.gamemodeSelector.addItems(self.gamemodeList)
+        
+        #load the json file and handle it, default the current one
+        self.load_gamemode(os.path.join(constants.GAMEMODES_PATH , str(self.gamemodeSelector.currentText()) + ".json"))
+    
     def load_map (self, map_directory):
         #We create a QImage in order to fetch map information
         img = QtGui.QImage(self.map_directory)
         return (img.width(), img.height(), img)
+    def load_gamemode(self, gamemodePath):
+        gamemodeConfig = json_handler.load_gamemode(os.path.join(sys.path[0],gamemodePath))
+        gamemodeCategories = gamemodeConfig['categories']
+        gamemodeEntities = gamemodeConfig['entities']
+        entityList = []
+        #we have to nest categories on the outside to conserve the order
+        for category in gamemodeCategories:
+            for entity in self.entityTypes:
+                if entity.attributes['category'] == category:
+                    entityList.append(entity)
+        for gamemodeEntity in gamemodeEntities:
+            for entity in self.entityTypes:
+                if entity.attributes['id'] == gamemodeEntity:
+                    entityList.append(entity)
+        
+        #generate the Labels
+        self.labelList = []
+        for iteration, entity in enumerate(entityList):
+            newEntity = EntityLabel(entity.attributes.copy(), self)
+            self.labelList.append(newEntity)
+            self.entityGrid.addWidget(newEntity, iteration, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+            self.ui.scrollAreaEntity.resetEntities()
     def scale_down(self):
         self.mapZoomLevel -= 3
         if self.mapZoomLevel <1:
@@ -96,6 +124,7 @@ class MyForm(QtGui.QMainWindow):
         #Set a new offset
         self.ui.scrollBarHorizontal.setSliderPosition(int(currentHorizontalProportion*self.ui.scrollBarHorizontal.maximum()))
         self.ui.scrollBarVertical.setSliderPosition(int(currentVerticalProportion*self.ui.scrollBarVertical.maximum()))
+        self.show_wizard()
     def scale_up(self):
         self.mapZoomLevel += 3
         if self.mapZoomLevel >12:
@@ -132,15 +161,18 @@ class MyForm(QtGui.QMainWindow):
         if function:
             action.triggered.connect(function)
         self.toolbar.addAction(action)
+    def show_wizard(self):
+        self.mapWizard = wizard.MapWizard()
+        #self.mapWizard.FinishButton.setAutoDefault (False)
 class EntityLabel (QtGui.QLabel):
-    def __init__(self, icon, myForm, parent=None):
+    def __init__(self, attributes, myForm, parent=None):
         QtGui.QLabel.__init__(self, parent)
-        #since we pass the full filename with extension, we need to only get the base
-        self.entityName = str(os.path.splitext(icon)[0])
+        self.attributes = attributes
+        
         self.setMouseTracking(True)
         
         #icon for entity
-        img = QtGui.QImage(os.path.join('icons/entities', str(icon)))
+        img = QtGui.QImage(os.path.join(sys.path[0], str(self.attributes['gbImage'])))
         width = img.width()
         height = img.height()
         icon = QtGui.QPixmap.fromImage(img)
@@ -149,11 +181,23 @@ class EntityLabel (QtGui.QLabel):
         self.setScaledContents(True)
         icon = icon.scaled(QtCore.QSize(width*2,height*2),QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.FastTransformation)
         self.setPixmap(icon)
-        #A callback so we can reference variables elsewhere
+        #A callback so we can reference main form variables elsewhere
         self.form = myForm
+        self.setStatusTip(self.attributes['humanReadableName'])
+        
     def mousePressEvent(self, event):
-        print(self.entityName)
-
+        self.emit(QtCore.SIGNAL("clicked(PyQt_PyObject)"), event)
+        try:
+            print(self.attributes['humanReadableName'])
+        except KeyError:
+            print("attribute 'humanReadableName' does not exist!")
+    def enterEvent(self, event):
+        app.setOverrideCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+    
+    def leaveEvent(self, event):
+        app.restoreOverrideCursor()
+    def clicked(self):
+        print("whatever")
 class MapPreview (QtGui.QLabel):
     def __init__(self, parent=None):
         QtGui.QLabel.__init__(self, parent)
@@ -178,6 +222,9 @@ class ScrollAreaEntity (QtGui.QScrollArea):
     def sizeHint(self):
         return QtCore.QSize(100,-1)
     def resizeEvent(self, event):
+        self.resetEntities()
+        
+    def resetEntities(self):
         myWidth = self.frameRect().width()
         entityWidth = constants.ENTITY_WIDTH
         entitySpacing = constants.ENTITY_SPACING
@@ -194,8 +241,8 @@ class ScrollAreaEntity (QtGui.QScrollArea):
         
         currentCollumn = 0
         currentRow = 0
-        for iteration, currentEntity in enumerate(self.form.entitityList):
-            self.form.entityGrid.addWidget(self.form.entitityList[iteration], currentRow, currentCollumn, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        for iteration, currentEntity in enumerate(self.form.labelList):
+            self.form.entityGrid.addWidget(self.form.labelList[iteration], currentRow, currentCollumn, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
             #If we have reached the end of a collumn, advance a row
             #(note that 0 modulous anything is 0, so it must be compensated for)
             if currentCollumn+1 == numberOfCollumns:
@@ -209,7 +256,15 @@ class ScrollAreaEntity (QtGui.QScrollArea):
         #update the scroll area
         self.form.containerWidget.setLayout(self.form.entityGrid)
         self.form.ui.scrollAreaEntity.setWidget(self.form.containerWidget)
-        
+class GamemodeSelector(QtGui.QComboBox):
+    def __init__(self, myForm, parent=None):
+        QtGui.QComboBox.__init__(self, parent)
+        self.form = myForm
+        QtCore.QObject.connect(self, QtCore.SIGNAL("currentIndexChanged(QString)"), self.changedMode)
+        self.setStatusTip("Select a Game Mode")
+    def changedMode(self):
+        currentText = str(self.currentText())
+        self.form.load_gamemode(os.path.join(constants.GAMEMODES_PATH , currentText + ".json"))
 if __name__ == "__main__":
   app = QtGui.QApplication(sys.argv)
   myapp = MyForm()

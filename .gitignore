@@ -16,3 +16,4 @@ dist/*
 *.komodotools
 *.komodoproject
 *.bak
+*/_FromGarrisonBuilder

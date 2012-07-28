@@ -1,57 +1,49 @@
 from __future__ import print_function, division
 import os, sys
 import json
-import entities
+import default_types
 
-class JsonHandler(object):
-    def __init__(self):
-        self.entityList = []
-        
-        self.generate_all_entities()
-        self.save_all_entities()
-        #self.save_entities()
-    def load_entities(self):
-        if os.path.exists('entity_types.json'):
-            with open('entity_types.json', 'r') as entity_dict:
-                self.exampleObject = json.load(entity_dict)
-        else:
-            self.exampleObject = {}
 
-    def generate_all_entities(self):
-        self.exampleObject = {
-            'categories' :[
-            {
-                'name' : 'Control Points',
-                'types' : [
-                        entities.controlpoint_1,
-                        entities.controlpoint_2,
-                ]
-            },
-            {
-                'name' : 'Spawn points',
-                'types' : [
-                    entities.spawn_red,
-                    entities.spawn_blue,
-                ]
-                
-            },
-            ]
-        }
-        for categoryIteration in range(len(self.exampleObject['categories'])):
-            category = str(self.exampleObject['categories'][categoryIteration]['name'])
-            for entityType in self.exampleObject['categories'][categoryIteration]['types']:
-                newEntity = Entity()
-                #Copy over the dict to the object
-                newEntity.attributes = entityType.copy()
-                newEntity.category = category
-                self.entityList.append(newEntity)
-                
-        for entity in self.entityList:
-            print(entity.category + ": " + str(entity.attributes['humanReadableName']))
-            
-    def save_all_entities(self):
-        with open('entity_types.json', 'w') as entity_dict:
-            json.dump(self.exampleObject, entity_dict, indent=4)
+def load_entities(entityTypePath):
+    if os.path.exists(entityTypePath):
+        with open(entityTypePath, 'r') as entity_dict:
+            entityTypes = json.load(entity_dict)
+    else:
+        entityTypes = {}
+    return(entityTypes)
+
+def load_gamemode(entityTypePath):
+    if os.path.exists(entityTypePath):
+        with open(entityTypePath, 'r') as entity_dict:
+            entities = json.load(entity_dict)
+    else:
+        print("unable to load gamemode")
+        entities = []
+    return(entities)
+
+def generate_all_entities():
+    
+    entityList = []
+    entityDict = default_types.return_entity_types()
+    
+    for categoryIteration in range(len(entityDict['categories'])):
+        category = str(entityDict['categories'][categoryIteration]['name'])
+        for entityType in entityDict['categories'][categoryIteration]['types']:
+            newEntity = Entity()
+            #Copy over the dict to the object
+            newEntity.attributes = entityType.copy()
+            newEntity.attributes['category'] = category
+            entityList.append(newEntity)
+    
+    #Check to see if the icons exist
+    for iterate, entity in enumerate(entityList):
+        if not os.path.isfile(os.path.join(sys.path[0],entity.attributes['gbImage'])):
+            print("path " + entity.attributes['gbImage'] + " does not exist for " + str (entity.attributes["id"]) + "!")
+            entityList.pop(iterate)
+    return (entityList)
+def save_all_entities(entityTypePath, config):
+    with open(entityTypePath, 'w') as entity_dict:
+        json.dump(config, entity_dict, indent=4)
 class Entity (object):
     def __init__(self):
         pass

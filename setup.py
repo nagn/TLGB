@@ -1,5 +1,4 @@
 from distutils.core import setup
-import py2exe
 
 setup(name="Garrison Builder",
       version="127.0",

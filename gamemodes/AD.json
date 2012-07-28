@@ -1,0 +1,10 @@
+{
+    "entities": [
+    ],
+    "categories" : [
+        "Walls",
+        "Floors",
+        "Control Points"
+    ]
+    
+}
