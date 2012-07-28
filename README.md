@@ -9,4 +9,3 @@ Dependencies
 TLGB requires the following dependency
 
 * [PyQt4](http://www.riverbankcomputing.com/software/pyqt/download)
-* [PIL](http://www.pythonware.com/products/pil/)
