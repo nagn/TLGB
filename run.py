@@ -4,30 +4,25 @@ import sys, os
 import glob
 import constants, json_handler
 from PyQt4 import QtCore, QtGui
+import legacy_file_handler as legacy
+import ImageQt
 from TLGB import Ui_MapEditor
 import wizard
+import tempfile
 class MyForm(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
+        
         self.ui = Ui_MapEditor()
         self.ui.setupUi(self)
         
         #The current executing directory of the python script
         self.directory = sys.path[0]
-        self.map_directory = os.path.join(self.directory , "sprites/montane/montane.png")
+        self.mapDirectory = os.path.join(self.directory , "sprites/floaton/cp_floaton.png")
+        self.tempDirectory = tempfile.mkdtemp()
         
         #Load the default configuration (All entity types)
         self.entityTypes = json_handler.generate_all_entities()
-        
-        #Generate the Scroll Area of the Map Previewer
-        self.ui.scrollAreaMap = ScrollAreaMap(self)
-        self.ui.verticalLayout.addWidget(self.ui.scrollAreaMap)
-        
-        #Lets get manual control of those scroll bars, baby
-        self.ui.scrollBarHorizontal = QtGui.QScrollBar()
-        self.ui.scrollBarVertical = QtGui.QScrollBar()
-        self.ui.scrollAreaMap.setHorizontalScrollBar(self.ui.scrollBarHorizontal)
-        self.ui.scrollAreaMap.setVerticalScrollBar(self.ui.scrollBarVertical)
         
         #Create the gamemode selecting comboBox before the scroll area, so it is on top
         self.gamemodeSelector = GamemodeSelector(self)
@@ -37,25 +32,21 @@ class MyForm(QtGui.QMainWindow):
         self.ui.scrollAreaEntity = ScrollAreaEntity(self)
         self.ui.verticalLayoutEntity.addWidget(self.ui.scrollAreaEntity)
         
-        #Generate the Map Preview Label
-        self.ui.mapPreview = MapPreview()
-        self.ui.scrollAreaMap.setWidget(self.ui.mapPreview)
-        
         self.mapZoomLevel = 6
         #Load Map, and grab the map data
-        self.mapWidth, self.mapHeight, mapImage = self.load_map(self.map_directory)
+        self.mapWidth, self.mapHeight, self.mapBackgroundImage, mapWallmaskImage = self.load_map(self.mapDirectory)
         
-        #Lets save the img for later use
-        self.mapImage = mapImage
+        #Convert the QImages into QPixmaps
+        mapBackground = QtGui.QPixmap.fromImage(self.mapBackgroundImage)
+        wallmaskBackground = QtGui.QPixmap.fromImage(mapWallmaskImage)
+        #Convert this to a bitmap
         
-        #Convert the QImage into QPixmap
-        mapBackground = QtGui.QPixmap.fromImage(self.mapImage)
+        mapWallmaskImage.invertPixels()
+        mapWallmaskBitmap = QtGui.QBitmap.fromImage(mapWallmaskImage)
         
-        #Scale the map to 6x
-        self.ui.mapPreview.setScaledContents(True)
-        mapBackground = mapBackground.scaled(QtCore.QSize(self.mapWidth*self.mapZoomLevel,self.mapHeight*self.mapZoomLevel),QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.FastTransformation)
-        self.ui.mapPreview.setPixmap(mapBackground)
-        self.ui.mapPreview.setFixedSize(mapBackground.size())
+        #Create the mapPreview
+        self.ui.mapPreview = MapPreview(mapBackground, wallmaskBackground, mapWallmaskBitmap, self)
+        self.ui.verticalLayout.addWidget(self.ui.mapPreview)
         
         #Create the Entity Grid
         self.entityGrid = QtGui.QGridLayout()
@@ -67,7 +58,7 @@ class MyForm(QtGui.QMainWindow):
         self.ui.scrollAreaEntity.setWidget(self.containerWidget)
         
         #Generate the ToolBar
-        self.add_toolbar('icons\gb\icon_new.png', 'New', None, QtGui.QKeySequence.New)
+        self.add_toolbar('icons\gb\icon_new.png', 'New', self.newMap, QtGui.QKeySequence.New)
         self.add_toolbar('icons\gb\open.png', 'Open', None, QtGui.QKeySequence.Open)
         self.add_toolbar('icons\gb\save.png', 'Save', None, QtGui.QKeySequence.Save)
         self.add_toolbar('icons\gb\delete.png', 'Exit', QtGui.qApp.quit, QtGui.QKeySequence.Quit)
@@ -75,6 +66,11 @@ class MyForm(QtGui.QMainWindow):
         self.add_toolbar('icons\gb\expand.png', 'Zoom In', self.scale_up, QtGui.QKeySequence.ZoomIn)
         self.add_toolbar('icons\gb\equal.png', 'Zoom Reset', self.scale_reset)
         
+        self.wallmaskVisible = True
+        self.backgroundVisible = True
+        self.entitiesVisible = True
+        self.ui.actionWallmask.triggered.connect(self.toggle_wallmask_visibility)
+        self.ui.actionBackground.triggered.connect(self.toggle_background_visibility)
         #Load all the json files in constants.GAMEMOES_PATH
         self.gamemodeList = []
         for gamemode in(glob.glob( os.path.join(constants.GAMEMODES_PATH, '*.json'))):
@@ -84,10 +80,19 @@ class MyForm(QtGui.QMainWindow):
         #load the json file and handle it, default the current one
         self.load_gamemode(os.path.join(constants.GAMEMODES_PATH , str(self.gamemodeSelector.currentText()) + ".json"))
     
-    def load_map (self, map_directory):
+        #Timer for refreshing the painter object
+        self.ui.constantProgress = 0
+        self.timer = QtCore.QTimer()
+        self.timer.start(16)
+        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.repaint_painter)
+
+    def load_map (self, mapDirectory):
         #We create a QImage in order to fetch map information
-        img = QtGui.QImage(self.map_directory)
-        return (img.width(), img.height(), img)
+        #Note that the ImageQt module actually breaks on windows for some reason, so we'll just use the temp image
+        entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), False)
+        mapWallmask = QtGui.QImage(os.path.join(self.tempDirectory,"wallmask.png"))
+        mapBackground = QtGui.QImage(self.mapDirectory)
+        return (mapWallmask.width(), mapWallmask.height(), mapBackground, mapWallmask)
     def load_gamemode(self, gamemodePath):
         gamemodeConfig = json_handler.load_gamemode(os.path.join(sys.path[0],gamemodePath))
         gamemodeCategories = gamemodeConfig['categories']
@@ -114,44 +119,17 @@ class MyForm(QtGui.QMainWindow):
         self.mapZoomLevel -= 3
         if self.mapZoomLevel <1:
             self.mapZoomLevel = 3
-        #Store the current offset
-        currentHorizontalProportion = float(self.ui.scrollBarHorizontal.sliderPosition())/max(1.0, float(self.ui.scrollBarHorizontal.maximum()))
-        currentVerticalProportion = float(self.ui.scrollBarVertical.sliderPosition())/max(1.0 ,float(self.ui.scrollBarVertical.maximum()))
-        pixmap = self.ui.mapPreview.pixmap()
-        pixmap = pixmap.scaledToHeight(self.mapHeight*self.mapZoomLevel, False)
-        self.ui.mapPreview.setPixmap(pixmap)
-        self.ui.mapPreview.setFixedSize(pixmap.size())
-        #Set a new offset
-        self.ui.scrollBarHorizontal.setSliderPosition(int(currentHorizontalProportion*self.ui.scrollBarHorizontal.maximum()))
-        self.ui.scrollBarVertical.setSliderPosition(int(currentVerticalProportion*self.ui.scrollBarVertical.maximum()))
-        self.show_wizard()
+        self.ui.mapPreview.repaint()
     def scale_up(self):
         self.mapZoomLevel += 3
         if self.mapZoomLevel >12:
             self.mapZoomLevel = 12
-        currentHorizontalProportion = float(self.ui.scrollBarHorizontal.sliderPosition())/max(1.0 ,float(self.ui.scrollBarHorizontal.maximum()))
-        currentVerticalProportion = float(self.ui.scrollBarVertical.sliderPosition())/max(1.0 ,float(self.ui.scrollBarVertical.maximum()))
-        
-        pixmap = self.ui.mapPreview.pixmap()
-        pixmap = pixmap.scaledToHeight(self.mapHeight*self.mapZoomLevel, False)
-        self.ui.mapPreview.setPixmap(pixmap)
-        self.ui.mapPreview.setFixedSize(pixmap.size())
-        
-        self.ui.scrollBarHorizontal.setSliderPosition(int(currentHorizontalProportion*self.ui.scrollBarHorizontal.maximum()))
-        self.ui.scrollBarVertical.setSliderPosition(int(currentVerticalProportion*self.ui.scrollBarVertical.maximum()))
+        self.ui.mapPreview.repaint()
     def scale_reset(self):
         self.mapZoomLevel = 6
-        currentHorizontalProportion = float(self.ui.scrollBarHorizontal.sliderPosition())/max(1.0, float(self.ui.scrollBarHorizontal.maximum()))
-        currentVerticalProportion = float(self.ui.scrollBarVertical.sliderPosition())/max(1.0 ,float(self.ui.scrollBarVertical.maximum()))
-        
-        pixmap = self.ui.mapPreview.pixmap()
-        pixmap = pixmap.scaledToHeight(self.mapHeight*self.mapZoomLevel, False)
-        self.ui.mapPreview.setPixmap(pixmap)
-        self.ui.mapPreview.setFixedSize(pixmap.size())
-        
-        self.ui.scrollBarHorizontal.setSliderPosition(int(currentHorizontalProportion*self.ui.scrollBarHorizontal.maximum()))
-        self.ui.scrollBarVertical.setSliderPosition(int(currentVerticalProportion*self.ui.scrollBarVertical.maximum()))
-        
+        self.ui.mapPreview.repaint()
+    def newMap(self):
+        self.show_wizard()
     def add_toolbar(self, iconPath, name, function = None, shortcut = None):
         
         action = QtGui.QAction(QtGui.QIcon(iconPath), name, self)
@@ -164,6 +142,32 @@ class MyForm(QtGui.QMainWindow):
     def show_wizard(self):
         self.mapWizard = wizard.MapWizard()
         #self.mapWizard.FinishButton.setAutoDefault (False)
+    def repaint_painter(self):
+        #self.ui.mapPreview
+        #val = self.ui.constantProgress + 1
+        #if val > 30:
+        if abs(self.ui.mapPreview.hspeed + self.ui.mapPreview.vspeed) > 0.01:
+            val = 0
+            self.ui.mapPreview.repaint()
+        #self.ui.constantProgress = val
+    def toggle_wallmask_visibility(self):
+        if self.ui.actionWallmask.isChecked():
+            self.wallmaskVisible = True
+            if not self.backgroundVisible:
+                self.ui.mapPreview.setAutoFillBackground(False)
+        else:
+            self.wallmaskVisible = False
+    def toggle_background_visibility(self):
+        if self.ui.actionBackground.isChecked():
+            self.backgroundVisible = True
+            palette = QtGui.QPalette()
+            palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black);
+            self.ui.mapPreview.setPalette(palette);
+            self.ui.mapPreview.setAutoFillBackground(True)
+        else:
+            self.backgroundVisible = False
+            if self.wallmaskVisible:
+                self.ui.mapPreview.setAutoFillBackground(False)
 class EntityLabel (QtGui.QLabel):
     def __init__(self, attributes, myForm, parent=None):
         QtGui.QLabel.__init__(self, parent)
@@ -265,8 +269,87 @@ class GamemodeSelector(QtGui.QComboBox):
     def changedMode(self):
         currentText = str(self.currentText())
         self.form.load_gamemode(os.path.join(constants.GAMEMODES_PATH , currentText + ".json"))
+
+class MapPreview(QtGui.QWidget):
+    def __init__(self, background, wallmaskBackground, wallmaskBitmap, form, parent=None):
+        super(MapPreview, self).__init__(parent)
+        #We need to do this to capture key input
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        
+        #Pregenerate the different background states
+        self.background = background
+        self.wallmaskBitmap = wallmaskBitmap
+        self.wallmaskBackground = wallmaskBackground.copy() 
+        self.backgroundAndWallmask = self.background.copy()
+        self.backgroundAndWallmask.setMask(self.wallmaskBitmap)
+        self.x,self.y = (0,0)
+        self.form = form
+        self.hspeed = 0
+        self.vspeed = 0
+        self.friction = 0.2
+        self.setAutoFillBackground(True)
+        
+        #Set the transparent background to be pure black by default
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black);
+        self.setPalette(palette);
+        
+    def sizeHint(self):
+        return QtCore.QSize(500, 700)
+    def minimumSizeHint(self):
+        return QtCore.QSize(100, 100);
+    def paintEvent(self, event):
+        
+        qp = QtGui.QPainter()
+        qp.begin(self)
+        qp.scale(self.form.mapZoomLevel,self.form.mapZoomLevel)
+        self.drawPixmaps(event, qp)
+        
+        qp.end()
+    def drawPixmaps(self, event, qp):
+        target = event.rect()
+        #translated doesn't modify the target in-place
+        source = target.translated(self.x, self.y)
+        if self.form.wallmaskVisible and self.form.backgroundVisible:
+            qp.drawPixmap(target, self.backgroundAndWallmask, source)
+        elif not self.form.wallmaskVisible and self.form.backgroundVisible:
+            qp.drawPixmap(target, self.background, source)
+        elif self.form.wallmaskVisible and not self.form.backgroundVisible:
+            qp.drawPixmap(target, self.wallmaskBackground, source)
+        #Handle scrolling
+        self.hspeed*=(1-self.friction)
+        self.vspeed*=(1-self.friction)
+        self.x += self.hspeed
+        self.y += self.vspeed
+        if self.x > self.background.width():
+            self.x = self.background.width()
+        elif self.x < 0:
+            self.x = 0
+        if self.y > self.background.height():
+            self.y = self.background.height()
+        elif self.y < 0:
+            self.y = 0
+        
+        if abs(self.hspeed) < 0.02:
+            self.hspeed = 0.0
+        if abs(self.vspeed) < 0.02:
+            self.vspeed = 0.0
+    def keyPressEvent(self, event):
+        key_left = QtGui.QKeySequence.fromString("a")
+        key_right = QtGui.QKeySequence.fromString("d")
+        key_up = QtGui.QKeySequence.fromString("w")
+        key_down = QtGui.QKeySequence.fromString("s")
+        if event.key() == (key_right):
+            self.hspeed+=1
+        if event.key() == (key_left):
+            self.hspeed-=1
+        if event.key() == (key_up):
+            self.vspeed-=1
+        if event.key() == (key_down):
+            self.vspeed+=1
+            
 if __name__ == "__main__":
-  app = QtGui.QApplication(sys.argv)
-  myapp = MyForm()
-  myapp.show()
-  sys.exit(app.exec_())
+    app = QtGui.QApplication(sys.argv)
+    myapp = MyForm()
+    myapp.show()
+    sys.exit(app.exec_())

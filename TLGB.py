@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GarrisonBuilder.ui'
 #
-# Created: Wed Jul 25 20:23:21 2012
+# Created: Tue Aug 07 19:02:44 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -84,11 +84,22 @@ class Ui_MapEditor(object):
         self.actionPaste = QtGui.QAction(MapEditor)
         self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
         self.actionWallmask = QtGui.QAction(MapEditor)
+        self.actionWallmask.setCheckable(True)
+        self.actionWallmask.setChecked(True)
         self.actionWallmask.setObjectName(_fromUtf8("actionWallmask"))
         self.actionEntities = QtGui.QAction(MapEditor)
+        self.actionEntities.setCheckable(True)
+        self.actionEntities.setChecked(True)
         self.actionEntities.setObjectName(_fromUtf8("actionEntities"))
         self.actionMirror_Entities = QtGui.QAction(MapEditor)
         self.actionMirror_Entities.setObjectName(_fromUtf8("actionMirror_Entities"))
+        self.actionTest = QtGui.QAction(MapEditor)
+        self.actionTest.setCheckable(True)
+        self.actionTest.setObjectName(_fromUtf8("actionTest"))
+        self.actionBackground = QtGui.QAction(MapEditor)
+        self.actionBackground.setCheckable(True)
+        self.actionBackground.setChecked(True)
+        self.actionBackground.setObjectName(_fromUtf8("actionBackground"))
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
@@ -98,7 +109,7 @@ class Ui_MapEditor(object):
         self.menuFile.addAction(self.actionQuit)
         self.menuEdit.addAction(self.actionCopy)
         self.menuEdit.addAction(self.actionPaste)
-        self.menuView.addAction(self.actionDock_Widget)
+        self.menuView.addAction(self.actionBackground)
         self.menuView.addAction(self.actionWallmask)
         self.menuView.addAction(self.actionEntities)
         self.menuMacros.addAction(self.actionMirror_Entities)
@@ -133,4 +144,6 @@ class Ui_MapEditor(object):
         self.actionWallmask.setText(QtGui.QApplication.translate("MapEditor", "Wallmask", None, QtGui.QApplication.UnicodeUTF8))
         self.actionEntities.setText(QtGui.QApplication.translate("MapEditor", "Entities", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMirror_Entities.setText(QtGui.QApplication.translate("MapEditor", "Mirror Entities", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTest.setText(QtGui.QApplication.translate("MapEditor", "Test", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBackground.setText(QtGui.QApplication.translate("MapEditor", "Background", None, QtGui.QApplication.UnicodeUTF8))
 

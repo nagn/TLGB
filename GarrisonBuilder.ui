@@ -84,7 +84,7 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionDock_Widget"/>
+    <addaction name="actionBackground"/>
     <addaction name="actionWallmask"/>
     <addaction name="actionEntities"/>
    </widget>
@@ -162,11 +162,23 @@
    </property>
   </action>
   <action name="actionWallmask">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Wallmask</string>
    </property>
   </action>
   <action name="actionEntities">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Entities</string>
    </property>
@@ -174,6 +186,25 @@
   <action name="actionMirror_Entities">
    <property name="text">
     <string>Mirror Entities</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Test</string>
+   </property>
+  </action>
+  <action name="actionBackground">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Background</string>
    </property>
   </action>
  </widget>

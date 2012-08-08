@@ -121,6 +121,7 @@ spawn_red = {
     'mapImage': 'sprites/entities/spawn_point_red.png',
     'gbImage' : 'icons/entities/spawn_point_red.png',
     'mapImageOrigin': {'x' : 29, 'y' : 40},
+    'legacyName' : 'redspawn',
     }
 spawn_blue = {
     'name': 'spawn_point_blue',
@@ -129,6 +130,7 @@ spawn_blue = {
     'mapImage': 'sprites/entities/spawn_point_blue.png',
     'gbImage' : 'icons/entities/spawn_point_blue.png',
     'mapImageOrigin': {'x' : 29, 'y' : 40},
+    'legacyName' : 'redspawn',
     }
 intel_red = {
     'name': 'intel red',
