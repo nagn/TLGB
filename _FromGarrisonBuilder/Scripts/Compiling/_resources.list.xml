@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <resource name="sprite2png" type="RESOURCE"/>
+  <resource name="strayEntityFix" type="RESOURCE"/>
+  <resource name="embedLevelDataToPNG" type="RESOURCE"/>
+  <resource name="testMap" type="RESOURCE"/>
+  <resource name="writeEntitiesToString" type="RESOURCE"/>
+  <resource name="compressWalkmaskToString" type="RESOURCE"/>
+  <resource name="MapEntityCheck" type="RESOURCE"/>
+</resources>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<event category="CREATE" id="0">
+  <actions>
+    <action id="603" library="1">
+      <!--action name: Code-->
+      <kind>CODE</kind>
+      <allowRelative>false</allowRelative>
+      <question>false</question>
+      <canApplyTo>true</canApplyTo>
+      <actionType>CODE</actionType>
+      <functionName/>
+      <relative>false</relative>
+      <not>false</not>
+      <appliesTo>.self</appliesTo>
+      <arguments>
+        <argument kind="STRING">{
+    /* 
+    global gamemode variable for making the mappers life easier
+    1 = CTF
+    2 = CP
+    3 = 3stage A/D CP
+    4 = Arena
+    5 = Generators
+    6 = Mapping pro mode for the 1337h4xx0r5!!11221342
+    7 = koth
+    */
+    global.gamemode = 0;
+    
+    virtualitem = -1;
+    xbegin = 40;
+    ybegin = 300;
+    spacing = 30;
+    width = 200; 
+    items = 10;
+    
+    item[0] = "";
+    item[1] = "CTF";
+    item[2] = "CP";
+    item[3] = "3 Stage CP (does this even work?)";
+    item[4] = "Arena";
+    item[5] = "Generator";
+    item[6] = "Free Mode";
+    item[7] = "Koth";
+    item[8] = "Dkoth";
+    item[9] = "Quit";
+
+}
+</argument>
+      </arguments>
+    </action>
+  </actions>
+</event>

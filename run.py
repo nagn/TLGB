@@ -364,9 +364,9 @@ class MapPreview(QtGui.QWidget):
         for iteration in range(len(self.renderingList)):
             x = self.renderingList[iteration][1][0]
             y = self.renderingList[iteration][1][1]
-            if x > self.x and x < self.x + self.frameSize().width() -10:
+            #if x > self.x and x < self.x + self.frameSize().width() -10:
                 #basic culling
-                qp.drawPixmap(QtCore.QPoint(x, y), self.renderingList[iteration][0])
+            qp.drawPixmap(QtCore.QPoint(x, y), self.renderingList[iteration][0])
     def drawPixmaps(self, event, qp):
         #Handle scrolling
         if self.keyByteSequence & 0x01:

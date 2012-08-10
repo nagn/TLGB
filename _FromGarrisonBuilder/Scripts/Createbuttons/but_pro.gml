@@ -1,0 +1,35 @@
+{
+
+    createToolButton(redintel);
+    createToolButton(blueintel);
+    createToolButton(NeutralIntel);
+    createToolButton(redintelgate);
+    createToolButton(redintelgate2);
+    createToolButton(blueintelgate);
+    createToolButton(blueintelgate2);
+    createToolButton(intelgatevertical);
+    createToolButton(intelgatehorizontal);
+    createToolButton(controlPoint1);
+    createToolButton(controlPoint2);
+    createToolButton(controlPoint3);
+    createToolButton(controlPoint4);
+    createToolButton(controlPoint5);
+    createToolButton(NextAreaO);
+    createToolButton(SetupGate);
+    createToolButton(CapturePoint);
+    createToolButton(ArenaControlPoint);
+    createToolButton(GeneratorRed);
+    createToolButton(GeneratorBlue);
+    createToolButton(KothControlPoint);
+    createToolButton(CapturePoint);
+    createToolButton(redspawn1)
+    createToolButton(redspawn2)
+    createToolButton(redspawn3)
+    createToolButton(redspawn4)
+    createToolButton(bluespawn1)
+    createToolButton(bluespawn2)
+    createToolButton(bluespawn3)
+    createToolButton(bluespawn4)
+    createToolButton(KothRedControlPoint);
+    createToolButton(KothBlueControlPoint);
+}

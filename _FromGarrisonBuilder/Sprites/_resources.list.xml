@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <resource name="whiteBack" type="RESOURCE"/>
+  <resource name="trans" type="RESOURCE"/>
+  <resource name="dragCur" type="RESOURCE"/>
+  <resource name="popupButtonS" type="RESOURCE"/>
+  <resource name="toolbarCap" type="RESOURCE"/>
+  <resource name="Entities" type="GROUP"/>
+  <resource name="Unused" type="GROUP"/>
+  <resource name="GUI" type="GROUP"/>
+</resources>

@@ -1,0 +1,4 @@
+{
+    createToolButton(GeneratorRed);
+    createToolButton(GeneratorBlue);
+}

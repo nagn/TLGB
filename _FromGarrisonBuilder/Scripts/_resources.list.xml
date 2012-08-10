@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <resource name="GUI" type="GROUP"/>
+  <resource name="Createbuttons" type="GROUP"/>
+  <resource name="load_BG" type="RESOURCE"/>
+  <resource name="load_exisMap" type="RESOURCE"/>
+  <resource name="load_decomp" type="RESOURCE"/>
+  <resource name="load_decomp_wm" type="RESOURCE"/>
+  <resource name="load_decomp_ent" type="RESOURCE"/>
+  <resource name="edit_BG" type="RESOURCE"/>
+  <resource name="edit_WM" type="RESOURCE"/>
+  <resource name="customClearSelect" type="RESOURCE"/>
+  <resource name="unload_BG" type="RESOURCE"/>
+  <resource name="set_nextmap_red" type="RESOURCE"/>
+  <resource name="set_nextmap_blu" type="RESOURCE"/>
+  <resource name="teleports" type="RESOURCE"/>
+  <resource name="timerChoice" type="RESOURCE"/>
+  <resource name="load_WM" type="RESOURCE"/>
+  <resource name="unload_WM" type="RESOURCE"/>
+  <resource name="create_entity" type="RESOURCE"/>
+  <resource name="load_entities" type="RESOURCE"/>
+  <resource name="unload_entities" type="RESOURCE"/>
+  <resource name="save_entities" type="RESOURCE"/>
+  <resource name="MapDecomps" type="GROUP"/>
+  <resource name="Compiling" type="GROUP"/>
+</resources>

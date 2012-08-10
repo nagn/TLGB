@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <resource name="but_gen" type="RESOURCE"/>
+  <resource name="but_initial" type="RESOURCE"/>
+  <resource name="but_pro" type="RESOURCE"/>
+  <resource name="but_ctf" type="RESOURCE"/>
+  <resource name="but_cp" type="RESOURCE"/>
+  <resource name="but_stcp" type="RESOURCE"/>
+  <resource name="but_arena" type="RESOURCE"/>
+  <resource name="but_koth" type="RESOURCE"/>
+  <resource name="but_dkoth" type="RESOURCE"/>
+  <resource name="ToolSpr_cl" type="RESOURCE"/>
+</resources>
