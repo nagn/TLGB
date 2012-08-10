@@ -9,6 +9,7 @@ import ImageQt
 from TLGB import Ui_MapEditor
 import wizard
 import tempfile
+import json
 class MyForm(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -34,7 +35,7 @@ class MyForm(QtGui.QMainWindow):
         
         self.mapZoomLevel = 6
         #Load Map, and grab the map data
-        self.mapWidth, self.mapHeight, self.mapBackgroundImage, mapWallmaskImage = self.load_map(self.mapDirectory)
+        self.mapWidth, self.mapHeight, self.mapBackgroundImage, mapWallmaskImage, entities = self.load_map(self.mapDirectory)
         
         #Convert the QImages into QPixmaps
         mapBackground = QtGui.QPixmap.fromImage(self.mapBackgroundImage)
@@ -44,8 +45,15 @@ class MyForm(QtGui.QMainWindow):
         mapWallmaskImage.invertPixels()
         mapWallmaskBitmap = QtGui.QBitmap.fromImage(mapWallmaskImage)
         
+        self.legacyEntityDict = json.loads(open("legacy_dict.json").read())
+        self.cachedEntities = {}
+        self.renderingEntityList = []
+        for iteration in range(len(entities)):
+            x, y =  (int(float(entities[iteration][1][0])), int(float(entities[iteration][1][1])))
+            self.renderingEntityList.append([self.createMapEntPixmap(entities[iteration][0]), [x,y]])
+        
         #Create the mapPreview
-        self.ui.mapPreview = MapPreview(mapBackground, wallmaskBackground, mapWallmaskBitmap, self)
+        self.ui.mapPreview = MapPreview(mapBackground, wallmaskBackground, mapWallmaskBitmap,self.renderingEntityList, self)
         self.ui.verticalLayout.addWidget(self.ui.mapPreview)
         
         #Create the Entity Grid
@@ -71,6 +79,7 @@ class MyForm(QtGui.QMainWindow):
         self.entitiesVisible = True
         self.ui.actionWallmask.triggered.connect(self.toggle_wallmask_visibility)
         self.ui.actionBackground.triggered.connect(self.toggle_background_visibility)
+        self.ui.actionEntities.triggered.connect(self.toggle_entity_visibility)
         #Load all the json files in constants.GAMEMOES_PATH
         self.gamemodeList = []
         for gamemode in(glob.glob( os.path.join(constants.GAMEMODES_PATH, '*.json'))):
@@ -85,14 +94,14 @@ class MyForm(QtGui.QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.start(16)
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.repaint_painter)
-
+        
     def load_map (self, mapDirectory):
         #We create a QImage in order to fetch map information
         #Note that the ImageQt module actually breaks on windows for some reason, so we'll just use the temp image
         entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), False)
         mapWallmask = QtGui.QImage(os.path.join(self.tempDirectory,"wallmask.png"))
         mapBackground = QtGui.QImage(self.mapDirectory)
-        return (mapWallmask.width(), mapWallmask.height(), mapBackground, mapWallmask)
+        return (mapWallmask.width(), mapWallmask.height(), mapBackground, mapWallmask, entities)
     def load_gamemode(self, gamemodePath):
         gamemodeConfig = json_handler.load_gamemode(os.path.join(sys.path[0],gamemodePath))
         gamemodeCategories = gamemodeConfig['categories']
@@ -111,7 +120,7 @@ class MyForm(QtGui.QMainWindow):
         #generate the Labels
         self.labelList = []
         for iteration, entity in enumerate(entityList):
-            newEntity = EntityLabel(entity.attributes.copy(), self)
+            newEntity = EntityButtonLabel(entity.attributes.copy(), self)
             self.labelList.append(newEntity)
             self.entityGrid.addWidget(newEntity, iteration, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
             self.ui.scrollAreaEntity.resetEntities()
@@ -143,7 +152,13 @@ class MyForm(QtGui.QMainWindow):
             self.mapZoomLevel = 12
         self.ui.mapPreview.repaint()
     def scale_reset(self):
+        frameWidthCenter = self.ui.mapPreview.x/self.mapZoomLevel + (self.ui.mapPreview.frameSize().width()/2)/self.mapZoomLevel
+        frameHeightCenter = self.ui.mapPreview.y/self.mapZoomLevel + (self.ui.mapPreview.frameSize().height()/2 )/self.mapZoomLevel
+        widthPercent = frameWidthCenter/(self.mapWidth)
+        heightPercent = frameHeightCenter/(self.mapHeight)
         self.mapZoomLevel = 6
+        self.ui.mapPreview.x = widthPercent * self.mapWidth * self.mapZoomLevel - (self.ui.mapPreview.frameSize().width()/2)
+        self.ui.mapPreview.y = heightPercent * self.mapHeight * self.mapZoomLevel  - (self.ui.mapPreview.frameSize().height()/2 )
         self.ui.mapPreview.repaint()
     def newMap(self):
         self.show_wizard()
@@ -161,6 +176,7 @@ class MyForm(QtGui.QMainWindow):
         #self.mapWizard.FinishButton.setAutoDefault (False)
     def repaint_painter(self):
         if abs(self.ui.mapPreview.hspeed + self.ui.mapPreview.vspeed) > 0.01 or self.ui.mapPreview.keyByteSequence != 0x0:
+            self.ui.mapPreview.renderingEntityList = self.renderingEntityList
             self.ui.mapPreview.repaint()
         #self.ui.constantProgress = val
     def toggle_wallmask_visibility(self):
@@ -170,6 +186,11 @@ class MyForm(QtGui.QMainWindow):
                 self.ui.mapPreview.setAutoFillBackground(False)
         else:
             self.wallmaskVisible = False
+    def toggle_entity_visibility(self):
+        if self.ui.actionEntities.isChecked():
+            self.entitiesVisible = True
+        else:
+            self.entitiesVisible = False
     def toggle_background_visibility(self):
         if self.ui.actionBackground.isChecked():
             self.backgroundVisible = True
@@ -181,8 +202,17 @@ class MyForm(QtGui.QMainWindow):
             self.backgroundVisible = False
             if self.wallmaskVisible:
                 self.ui.mapPreview.setAutoFillBackground(False)
+                
 
-class EntityLabel (QtGui.QLabel):
+    def createMapEntPixmap(self, entityFileName):
+        #Memoized for speed
+        if not entityFileName in self.cachedEntities:
+            self.cachedEntities[entityFileName] = self.returnMapEntPixmap(entityFileName)
+        return self.cachedEntities[entityFileName]
+    def returnMapEntPixmap(self, entityFileName):
+        pixmap = QtGui.QPixmap(os.path.join(self.legacyEntityDict[entityFileName],"image 0.png"))
+        return(pixmap)
+class EntityButtonLabel (QtGui.QLabel):
     def __init__(self, attributes, myForm, parent=None):
         QtGui.QLabel.__init__(self, parent)
         self.attributes = attributes
@@ -214,6 +244,13 @@ class EntityLabel (QtGui.QLabel):
     
     def leaveEvent(self, event):
         app.restoreOverrideCursor()
+class MapEntityLabel(QtGui.QLabel):
+    def __init__(self, pixmap, x, y, parent=None):
+        super(MapEntityLabel, self).__init__(parent)
+        self.setPixmap(pixmap)
+        self.x = x
+        self.y = y
+
 class ScrollAreaMap (QtGui.QScrollArea):
     def __init__(self, form, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
@@ -279,7 +316,7 @@ class GamemodeSelector(QtGui.QComboBox):
         self.form.load_gamemode(os.path.join(constants.GAMEMODES_PATH , currentText + ".json"))
 
 class MapPreview(QtGui.QWidget):
-    def __init__(self, background, wallmaskBackground, wallmaskBitmap, form, parent=None):
+    def __init__(self, background, wallmaskBackground, wallmaskBitmap, renderingList, form, parent=None):
         super(MapPreview, self).__init__(parent)
         #We need to do this to capture key input
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -295,15 +332,15 @@ class MapPreview(QtGui.QWidget):
         self.form = form
         self.hspeed = 0
         self.vspeed = 0
-        self.friction = 0.4
+        self.friction = 0.35
         self.setAutoFillBackground(True)
         self.keyByteSequence = 0x0
         #Set the transparent background to be pure black by default
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black)
         self.setPalette(palette)
-        img = QtGui.QImage("C:\Users\Linda Lin\TLGB\sprites\entities\spawn_point_red.png")
-        self.icon =  QtGui.QPixmap.fromImage(img)
+        
+        self.renderingList = renderingList
     def sizeHint(self):
         return QtCore.QSize(500, 700)
     def minimumSizeHint(self):
@@ -319,11 +356,17 @@ class MapPreview(QtGui.QWidget):
         qp.restore()
         #The entities are prescaled at 6x, so we compensate
         qp.scale(self.form.mapZoomLevel/6,self.form.mapZoomLevel/6)
-        self.drawEntities(event, qp)
+        if self.form.entitiesVisible == True:
+            self.drawEntities(event, qp)
         qp.end()
         
-    def drawEntities(self, event, qp): 
-        qp.drawPixmap (QtCore.QPointF(20, 20), self.icon)
+    def drawEntities(self, event, qp):
+        for iteration in range(len(self.renderingList)):
+            x = self.renderingList[iteration][1][0]
+            y = self.renderingList[iteration][1][1]
+            if x > self.x and x < self.x + self.frameSize().width() -10:
+                #basic culling
+                qp.drawPixmap(QtCore.QPoint(x, y), self.renderingList[iteration][0])
     def drawPixmaps(self, event, qp):
         #Handle scrolling
         if self.keyByteSequence & 0x01:
