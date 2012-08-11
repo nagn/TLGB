@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GarrisonBuilder.ui'
 #
-# Created: Tue Aug 07 19:02:44 2012
+# Created: Fri Aug 10 21:30:15 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!

@@ -4,8 +4,8 @@ import sys, os
 import glob
 import constants, json_handler
 from PyQt4 import QtCore, QtGui
+import render_scene
 import legacy_file_handler as legacy
-import ImageQt
 from TLGB import Ui_MapEditor
 import wizard
 import tempfile
@@ -37,14 +37,6 @@ class MyForm(QtGui.QMainWindow):
         #Load Map, and grab the map data
         self.mapWidth, self.mapHeight, self.mapBackgroundImage, mapWallmaskImage, entities = self.load_map(self.mapDirectory)
         
-        #Convert the QImages into QPixmaps
-        mapBackground = QtGui.QPixmap.fromImage(self.mapBackgroundImage)
-        wallmaskBackground = QtGui.QPixmap.fromImage(mapWallmaskImage)
-        #Convert this to a bitmap
-        
-        mapWallmaskImage.invertPixels()
-        mapWallmaskBitmap = QtGui.QBitmap.fromImage(mapWallmaskImage)
-        
         self.legacyEntityDict = json.loads(open("legacy_dict.json").read())
         self.cachedEntities = {}
         self.renderingEntityList = []
@@ -52,9 +44,9 @@ class MyForm(QtGui.QMainWindow):
             x, y =  (int(float(entities[iteration][1][0])), int(float(entities[iteration][1][1])))
             self.renderingEntityList.append([self.createMapEntPixmap(entities[iteration][0]), [x,y]])
         
-        #Create the mapPreview
-        self.ui.mapPreview = MapPreview(mapBackground, wallmaskBackground, mapWallmaskBitmap,self.renderingEntityList, self)
-        self.ui.verticalLayout.addWidget(self.ui.mapPreview)
+        #Create the mapPreviewScene
+        self.ui.mapPreviewScene = render_scene.MapPreviewScene(self.mapBackgroundImage, mapWallmaskImage, self.renderingEntityList, self)
+        self.ui.verticalLayout.addWidget(self.ui.mapPreviewScene.views()[0])
         
         #Create the Entity Grid
         self.entityGrid = QtGui.QGridLayout()
@@ -90,10 +82,10 @@ class MyForm(QtGui.QMainWindow):
         self.load_gamemode(os.path.join(constants.GAMEMODES_PATH , str(self.gamemodeSelector.currentText()) + ".json"))
     
         #Timer for refreshing the painter object
-        self.ui.constantProgress = 0
-        self.timer = QtCore.QTimer()
-        self.timer.start(16)
-        QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.repaint_painter)
+        #self.ui.constantProgress = 0
+        #self.timer = QtCore.QTimer()
+        #self.timer.start(16)
+        #QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.repaint_painter)
         
     def load_map (self, mapDirectory):
         #We create a QImage in order to fetch map information
@@ -125,41 +117,15 @@ class MyForm(QtGui.QMainWindow):
             self.entityGrid.addWidget(newEntity, iteration, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
             self.ui.scrollAreaEntity.resetEntities()
     def scale_down(self):
-        frameWidthCenter = self.ui.mapPreview.x/self.mapZoomLevel + (self.ui.mapPreview.frameSize().width()/2)/self.mapZoomLevel
-        frameHeightCenter = self.ui.mapPreview.y/self.mapZoomLevel + (self.ui.mapPreview.frameSize().height()/2 )/self.mapZoomLevel
-        widthPercent = frameWidthCenter/(self.mapWidth)
-        heightPercent = frameHeightCenter/(self.mapHeight)
-        
-        if self.mapZoomLevel >3:
+        if self.mapZoomLevel > 3:
             self.mapZoomLevel -= 3
-            self.ui.mapPreview.x = widthPercent * self.mapWidth * self.mapZoomLevel - (self.ui.mapPreview.frameSize().width()/2)
-            self.ui.mapPreview.y = heightPercent * self.mapHeight * self.mapZoomLevel  - (self.ui.mapPreview.frameSize().height()/2 )
-        else:
-            self.mapZoomLevel = 3
-
-        self.ui.mapPreview.repaint()
+            self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
     def scale_up(self):
-        frameWidthCenter = self.ui.mapPreview.x/self.mapZoomLevel + (self.ui.mapPreview.frameSize().width()/2)/self.mapZoomLevel
-        frameHeightCenter = self.ui.mapPreview.y/self.mapZoomLevel + (self.ui.mapPreview.frameSize().height()/2 )/self.mapZoomLevel
-        widthPercent = frameWidthCenter/(self.mapWidth)
-        heightPercent = frameHeightCenter/(self.mapHeight)
-        if self.mapZoomLevel <12:
-            self.mapZoomLevel += 3
-            self.ui.mapPreview.x = widthPercent * self.mapWidth * self.mapZoomLevel - (self.ui.mapPreview.frameSize().width()/2)
-            self.ui.mapPreview.y = heightPercent * self.mapHeight * self.mapZoomLevel  - (self.ui.mapPreview.frameSize().height()/2 )
-            
-        else:
-            self.mapZoomLevel = 12
-        self.ui.mapPreview.repaint()
+        self.mapZoomLevel +=3
+        self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
     def scale_reset(self):
-        frameWidthCenter = self.ui.mapPreview.x/self.mapZoomLevel + (self.ui.mapPreview.frameSize().width()/2)/self.mapZoomLevel
-        frameHeightCenter = self.ui.mapPreview.y/self.mapZoomLevel + (self.ui.mapPreview.frameSize().height()/2 )/self.mapZoomLevel
-        widthPercent = frameWidthCenter/(self.mapWidth)
-        heightPercent = frameHeightCenter/(self.mapHeight)
         self.mapZoomLevel = 6
-        self.ui.mapPreview.x = widthPercent * self.mapWidth * self.mapZoomLevel - (self.ui.mapPreview.frameSize().width()/2)
-        self.ui.mapPreview.y = heightPercent * self.mapHeight * self.mapZoomLevel  - (self.ui.mapPreview.frameSize().height()/2 )
-        self.ui.mapPreview.repaint()
+        self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
     def newMap(self):
         self.show_wizard()
     def add_toolbar(self, iconPath, name, function = None, shortcut = None):
@@ -178,7 +144,6 @@ class MyForm(QtGui.QMainWindow):
         if abs(self.ui.mapPreview.hspeed + self.ui.mapPreview.vspeed) > 0.01 or self.ui.mapPreview.keyByteSequence != 0x0:
             self.ui.mapPreview.renderingEntityList = self.renderingEntityList
             self.ui.mapPreview.repaint()
-        #self.ui.constantProgress = val
     def toggle_wallmask_visibility(self):
         if self.ui.actionWallmask.isChecked():
             self.wallmaskVisible = True
@@ -315,141 +280,11 @@ class GamemodeSelector(QtGui.QComboBox):
         currentText = str(self.currentText())
         self.form.load_gamemode(os.path.join(constants.GAMEMODES_PATH , currentText + ".json"))
 
-class MapPreview(QtGui.QWidget):
-    def __init__(self, background, wallmaskBackground, wallmaskBitmap, renderingList, form, parent=None):
-        super(MapPreview, self).__init__(parent)
-        #We need to do this to capture key input
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        
-        #Pregenerate the different background states
-        self.background = background
-        self.wallmaskBitmap = wallmaskBitmap
-        self.wallmaskBackground = wallmaskBackground.copy() 
-        self.backgroundAndWallmask = self.background.copy()
-        self.backgroundAndWallmask.setMask(self.wallmaskBitmap)
-        
-        self.x,self.y = (0,0)
-        self.form = form
-        self.hspeed = 0
-        self.vspeed = 0
-        self.friction = 0.35
-        self.setAutoFillBackground(True)
-        self.keyByteSequence = 0x0
-        #Set the transparent background to be pure black by default
-        palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black)
-        self.setPalette(palette)
-        
-        self.renderingList = renderingList
-    def sizeHint(self):
-        return QtCore.QSize(500, 700)
-    def minimumSizeHint(self):
-        return QtCore.QSize(100, 100);
-    def paintEvent(self, event):
-        
-        qp = QtGui.QPainter()
-        qp.begin(self)
-        qp.setViewport(-self.x, -self.y, self.frameSize().width(), self.frameSize().height())
-        qp.save()
-        qp.scale(self.form.mapZoomLevel,self.form.mapZoomLevel)
-        self.drawPixmaps(event, qp)
-        qp.restore()
-        #The entities are prescaled at 6x, so we compensate
-        qp.scale(self.form.mapZoomLevel/6,self.form.mapZoomLevel/6)
-        if self.form.entitiesVisible == True:
-            self.drawEntities(event, qp)
-        qp.end()
-        
-    def drawEntities(self, event, qp):
-        for iteration in range(len(self.renderingList)):
-            x = self.renderingList[iteration][1][0]
-            y = self.renderingList[iteration][1][1]
-            #if x > self.x and x < self.x + self.frameSize().width() -10:
-                #basic culling
-            qp.drawPixmap(QtCore.QPoint(x, y), self.renderingList[iteration][0])
-    def drawPixmaps(self, event, qp):
-        #Handle scrolling
-        if self.keyByteSequence & 0x01:
-            self.hspeed+=5
-        if self.keyByteSequence & 0x02:
-            self.hspeed-=5
-        if self.keyByteSequence & 0x04:
-            self.vspeed-=5
-        if self.keyByteSequence & 0x08:
-            self.vspeed+=5
-        
-        self.hspeed*=(1-self.friction)
-        self.vspeed*=(1-self.friction)
-        self.x += self.hspeed
-        self.y += self.vspeed
-        #compensate for top left coordinate system
-        if self.x > self.background.width() * self.form.mapZoomLevel - self.frameSize().width():
-            self.x = self.background.width()* self.form.mapZoomLevel - self.frameSize().width()
-        elif self.x < 0:
-            self.x = 0
-        if self.y > self.background.height()* self.form.mapZoomLevel - self.frameSize().height():
-            self.y = self.background.height()* self.form.mapZoomLevel - self.frameSize().height()
-        elif self.y < 0:
-            self.y = 0
-        
-        if abs(self.hspeed) < 0.02:
-            self.hspeed = 0.0
-        if abs(self.vspeed) < 0.02:
-            self.vspeed = 0.0
-                #target = event.rect()
-        #translated doesn't modify the target in-place
-        #source = target.translated(self.x, self.y)
-        if self.form.wallmaskVisible and self.form.backgroundVisible:
-            qp.drawPixmap(QtCore.QPoint(0, 0), self.backgroundAndWallmask)
-        elif not self.form.wallmaskVisible and self.form.backgroundVisible:
-            qp.drawPixmap(QtCore.QPoint(0, 0), self.background)
-        elif self.form.wallmaskVisible and not self.form.backgroundVisible:
-            qp.drawPixmap(QtCore.QPoint(0, 0),self.wallmaskBackground)
-    def keyPressEvent(self, event):
-        key_left = QtGui.QKeySequence.fromString("a")
-        key_right = QtGui.QKeySequence.fromString("d")
-        key_up = QtGui.QKeySequence.fromString("w")
-        key_down = QtGui.QKeySequence.fromString("s")
-        if event.isAutoRepeat()  == False:
-            self.keyByteSequence = 0x0
-            if event.key() == (key_right):
-                self.keyByteSequence |= 0x01
-                #+hspeed
-                event.accept()
-            if event.key() == (key_left):
-                self.keyByteSequence |= 0x02
-                #-hspeed
-                event.accept()
-            if event.key() == (key_up):
-                self.keyByteSequence |= 0x04
-                #self.vspeed-=1
-                event.accept()
-            if event.key() == (key_down):
-                self.keyByteSequence |= 0x08
-                #self.vspeed+=1
-                event.accept()
-    def keyReleaseEvent(self, event):
-        key_left = QtGui.QKeySequence.fromString("a")
-        key_right = QtGui.QKeySequence.fromString("d")
-        key_up = QtGui.QKeySequence.fromString("w")
-        key_down = QtGui.QKeySequence.fromString("s")
-        if event.isAutoRepeat()  == False:
-            if event.key() == (key_right):
-                self.keyByteSequence &= 0xE
-                event.accept()
-            if event.key() == (key_left):
-                self.keyByteSequence &= 0xD
-                event.accept()
-            if event.key() == (key_up):
-                self.keyByteSequence &= 0xB
-                event.accept()
-            if event.key() == (key_down):
-                self.keyByteSequence &= 0x7
-                event.accept()
-    def focusOutEvent(self, event):
-        self.keyByteSequence = 0x0
+
+
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    
+    app = QtGui.QApplication([sys.argv, "-graphicssystem raster"])
     myapp = MyForm()
     myapp.show()
     sys.exit(app.exec_())
