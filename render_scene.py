@@ -15,32 +15,27 @@ class MapPreviewScene(QtGui.QGraphicsScene):
         self.view.scale(self.form.mapZoomLevel,self.form.mapZoomLevel)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         
-        for iteration in range(len(self.renderingList)):
-            x, y = self.renderingList[iteration][1]
-            xOffset, yOffset = self.renderingList[iteration][2]
+        for renderedEntity in self.renderingList:
+            x, y = renderedEntity[1]
+            xOffset, yOffset = renderedEntity[2]
             #The QGraphicsItem added will default to 0,0 for its coordinates. We should override it.
-            entity = self.addPixmap(self.renderingList[iteration][0])
+            entity = self.addPixmap(renderedEntity[0])
             #reverse the transformations that scaling the view does for the entities
             viewTransform = self.view.transform().inverted()
             #The boolean result is the second part of the tuple. We don't care if we're passing the identity or not, so here
             entity.setTransform(viewTransform[0])
             entity.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
             entity.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-            #entity.setPos (xOffset, yOffset)
-            #print(entity.mapToScene(x,y))
             entity.setPos(entity.mapToScene(x,y))
             entity.setOffset(xOffset, yOffset)
             entity.setOpacity(0.75)
     def updateScene(self):
         pass
     def changeScale(self, scaleLevel):
-        #print(self.view.transform().m22())
         viewTransform = self.view.transform()
         viewTransform.reset()
         viewTransform = viewTransform.scale(scaleLevel,scaleLevel)
         self.view.setTransform(viewTransform)
-        #resettedTransform.scale(scaleLevel,scaleLevel)
-        #self.view.scale(scaleLevel,scaleLevel)
 class MapPreview(QtGui.QWidget):
     def __init__(self, background, wallmaskBackground, wallmaskBitmap, renderingList, form, parent=None):
         super(MapPreview, self).__init__(parent)

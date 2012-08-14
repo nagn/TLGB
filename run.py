@@ -118,11 +118,10 @@ class MyForm(QtGui.QMainWindow):
             self.entityGrid.addWidget(newEntity, iteration, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
             self.ui.scrollAreaEntity.resetEntities()
     def scale_down(self):
-        if self.mapZoomLevel > 3:
-            self.mapZoomLevel -= 3
-            self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
+        self.mapZoomLevel /= 1.2
+        self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
     def scale_up(self):
-        self.mapZoomLevel +=3
+        self.mapZoomLevel *= 1.2
         self.ui.mapPreviewScene.changeScale(self.mapZoomLevel)
     def scale_reset(self):
         self.mapZoomLevel = 6
