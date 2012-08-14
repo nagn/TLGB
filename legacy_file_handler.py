@@ -62,13 +62,15 @@ def decompressWallmaskData(filename, outputWallmaskName, transparentOutput):
             img = Image.new('RGBA', (mapWidth, mapHeight))
         
         imagePixelData = []
-        for char in wallmaskData:
-            decodeChar(char, imagePixelData, transparentOutput)
         
+        for char in wallmaskData:
+            imagePixelData.extend(decodeChar(char, transparentOutput))
+            decodeChar(char, transparentOutput)
         if len(imagePixelData) > mapWidth * mapHeight:
             #shave off the excess pixel data that are left over from a 6 bit chunk
             imagePixelData = imagePixelData[:-(len(imagePixelData) - mapWidth * mapHeight)]
         img.putdata(imagePixelData)
+        #del(imagePixelData)
         if outputWallmaskName != None:
             if os.path.exists(outputWallmaskName):
                 try:
@@ -80,22 +82,30 @@ def decompressWallmaskData(filename, outputWallmaskName, transparentOutput):
         return(img)
     else:
         raise Exception("WALLMASK DATA NOT FOUND IN " + str(filename))
-
-def decodeChar(char, pixelList, transparentOutput):
+def memoize(f):
+    cache= {}
+    def memf(*x):
+        if x not in cache:
+            cache[x] = f(*x)
+        return cache[x]
+    return memf
+@memoize
+def decodeChar(char, transparentOutput):
     sixLeastSignificantBits = (ord(char) - 32) & 0b111111
-    if transparentOutput is True:
+    if transparentOutput == True:
         blackTuple = (0, 0, 0, 255)
         whiteTuple = (255, 255, 255 , 0)
     else:
         blackTuple = (0)
         whiteTuple = (255)
+    result = []
     for i in range(0,6):
         if (sixLeastSignificantBits & (1<<(5-i))):
             #if it is solid
-            pixelList.append(blackTuple)
+            result.append(blackTuple)
         else:
-            pixelList.append(whiteTuple)
-            
+            result.append(whiteTuple)
+    return(result)
 def compressEntityData(entityList):
     #This function takes a list of entities (and their corresponding list of arguments) and converts them back into a string
     entityString = ""

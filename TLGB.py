@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GarrisonBuilder.ui'
 #
-# Created: Fri Aug 10 21:30:15 2012
+# Created: Tue Aug 14 14:34:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,6 +55,9 @@ class Ui_MapEditor(object):
         self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
+        self.menuEntities = QtGui.QMenu(self.menuView)
+        self.menuEntities.setGeometry(QtCore.QRect(412, 173, 159, 94))
+        self.menuEntities.setObjectName(_fromUtf8("menuEntities"))
         self.menuMacros = QtGui.QMenu(self.menubar)
         self.menuMacros.setObjectName(_fromUtf8("menuMacros"))
         MapEditor.setMenuBar(self.menubar)
@@ -87,10 +90,6 @@ class Ui_MapEditor(object):
         self.actionWallmask.setCheckable(True)
         self.actionWallmask.setChecked(True)
         self.actionWallmask.setObjectName(_fromUtf8("actionWallmask"))
-        self.actionEntities = QtGui.QAction(MapEditor)
-        self.actionEntities.setCheckable(True)
-        self.actionEntities.setChecked(True)
-        self.actionEntities.setObjectName(_fromUtf8("actionEntities"))
         self.actionMirror_Entities = QtGui.QAction(MapEditor)
         self.actionMirror_Entities.setObjectName(_fromUtf8("actionMirror_Entities"))
         self.actionTest = QtGui.QAction(MapEditor)
@@ -100,6 +99,16 @@ class Ui_MapEditor(object):
         self.actionBackground.setCheckable(True)
         self.actionBackground.setChecked(True)
         self.actionBackground.setObjectName(_fromUtf8("actionBackground"))
+        self.actionRedundentEntities = QtGui.QAction(MapEditor)
+        self.actionRedundentEntities.setObjectName(_fromUtf8("actionRedundentEntities"))
+        self.actionRedundentEnt = QtGui.QAction(MapEditor)
+        self.actionRedundentEnt.setCheckable(True)
+        self.actionRedundentEnt.setChecked(True)
+        self.actionRedundentEnt.setObjectName(_fromUtf8("actionRedundentEnt"))
+        self.actionBasicEntities = QtGui.QAction(MapEditor)
+        self.actionBasicEntities.setCheckable(True)
+        self.actionBasicEntities.setChecked(True)
+        self.actionBasicEntities.setObjectName(_fromUtf8("actionBasicEntities"))
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
@@ -109,9 +118,11 @@ class Ui_MapEditor(object):
         self.menuFile.addAction(self.actionQuit)
         self.menuEdit.addAction(self.actionCopy)
         self.menuEdit.addAction(self.actionPaste)
+        self.menuEntities.addAction(self.actionBasicEntities)
+        self.menuEntities.addAction(self.actionRedundentEnt)
         self.menuView.addAction(self.actionBackground)
         self.menuView.addAction(self.actionWallmask)
-        self.menuView.addAction(self.actionEntities)
+        self.menuView.addAction(self.menuEntities.menuAction())
         self.menuMacros.addAction(self.actionMirror_Entities)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -127,6 +138,7 @@ class Ui_MapEditor(object):
         self.menuFile.setTitle(QtGui.QApplication.translate("MapEditor", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MapEditor", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MapEditor", "View", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuEntities.setTitle(QtGui.QApplication.translate("MapEditor", "Entities", None, QtGui.QApplication.UnicodeUTF8))
         self.menuMacros.setTitle(QtGui.QApplication.translate("MapEditor", "Macros", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setText(QtGui.QApplication.translate("MapEditor", "New", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setText(QtGui.QApplication.translate("MapEditor", "Open", None, QtGui.QApplication.UnicodeUTF8))
@@ -142,8 +154,10 @@ class Ui_MapEditor(object):
         self.actionPaste.setText(QtGui.QApplication.translate("MapEditor", "Paste", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPaste.setShortcut(QtGui.QApplication.translate("MapEditor", "Ctrl+V", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWallmask.setText(QtGui.QApplication.translate("MapEditor", "Wallmask", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionEntities.setText(QtGui.QApplication.translate("MapEditor", "Entities", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMirror_Entities.setText(QtGui.QApplication.translate("MapEditor", "Mirror Entities", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTest.setText(QtGui.QApplication.translate("MapEditor", "Test", None, QtGui.QApplication.UnicodeUTF8))
         self.actionBackground.setText(QtGui.QApplication.translate("MapEditor", "Background", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRedundentEntities.setText(QtGui.QApplication.translate("MapEditor", "Redundent Entities", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRedundentEnt.setText(QtGui.QApplication.translate("MapEditor", "Redundent Entities", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBasicEntities.setText(QtGui.QApplication.translate("MapEditor", "Basic Entities", None, QtGui.QApplication.UnicodeUTF8))
 

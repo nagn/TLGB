@@ -2,19 +2,23 @@
 from __future__ import print_function, division
 from PyQt4 import QtCore, QtGui
 class MapPreviewScene(QtGui.QGraphicsScene):
-    def __init__(self, backgroundImage, wallmaskImage, renderingList, form, parent=None):
+    def __init__(self, backgroundImage, wallmaskImage, renderingList, redundentLegacyList, form, parent=None):
         super(MapPreviewScene, self).__init__(parent)
+        
         self.backgroundImage = backgroundImage
-        self.addPixmap(QtGui.QPixmap(backgroundImage))
+        self.background = self.addPixmap(QtGui.QPixmap(backgroundImage))
+        self.background.setZValue(-2)
         
-        
+        #self.wallmaskImage = wallmaskImage
+        self.wallmask = self.addPixmap(QtGui.QPixmap(wallmaskImage))
+        self.wallmask.setZValue(-1)
         QtCore.QObject.connect(self, QtCore.SIGNAL("changed(QList<QRectF>)"), self.updateScene)
         self.form = form
         self.renderingList = renderingList
         self.view = QtGui.QGraphicsView(self)
         self.view.scale(self.form.mapZoomLevel,self.form.mapZoomLevel)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-        
+        self.view.setMouseTracking(True)
         for renderedEntity in self.renderingList:
             x, y = renderedEntity[1]
             xOffset, yOffset = renderedEntity[2]
@@ -28,9 +32,44 @@ class MapPreviewScene(QtGui.QGraphicsScene):
             entity.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
             entity.setPos(entity.mapToScene(x,y))
             entity.setOffset(xOffset, yOffset)
-            entity.setOpacity(0.75)
+            entity.setOpacity(0.65)
+            #Special attributes we set for the sake of sorting
+            entity.setData(0, renderedEntity[3])
+            entity.setZValue(1)
+            entity.setToolTip(renderedEntity[3])
+        self.redundentLegacyList = redundentLegacyList
     def updateScene(self):
         pass
+    def changeVisiblity(self):
+        if self.form.wallmaskVisible == False:
+            self.wallmask.hide()
+        else:
+            self.wallmask.show()
+        self.wallmask.update()
+        if self.form.backgroundVisible == False:
+            self.background.hide()
+        else:
+            self.background.show()
+        self.background.update()
+        
+        redundantEntities =[item for item in self.items() if item.data(0) in self.redundentLegacyList
+                            and item != self.wallmask and item != self.background]
+        basicEntities = [item for item in self.items() if item.data(0) not in self.redundentLegacyList
+                         and item != self.wallmask and item != self.background]
+        
+        for basicEntity in basicEntities:
+            if self.form.basicEntitiesVisible:
+                basicEntity.show()
+            else:
+                basicEntity.hide()
+            basicEntity.update()
+        for redundentEntity in redundantEntities:
+            if self.form.redundentEntitiesVisible:
+                redundentEntity.show()
+            else:
+                redundentEntity.hide()
+            redundentEntity.update()
+        
     def changeScale(self, scaleLevel):
         viewTransform = self.view.transform()
         viewTransform.reset()

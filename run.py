@@ -42,11 +42,13 @@ class MyForm(QtGui.QMainWindow):
         self.renderingEntityList = []
         for iteration in range(len(entities)):
             x, y =  entities[iteration][1]
-            mapEntityPixmap , (xOffset, yOffset) = self.createMapEntPixmap(entities[iteration][0])
-            self.renderingEntityList.append((mapEntityPixmap, (x,y), (-xOffset, -yOffset)))
+            mapEntityPixmap , (xOffset, yOffset), entityName = self.createMapEntPixmap(entities[iteration][0])
+            self.renderingEntityList.append((mapEntityPixmap, (x,y), (-xOffset, -yOffset), entityName))
+        #these are a list of entities to be ignored while that option is toggled
+        self.redundentEntityList = json.loads(open("redundent_legacy_types.json").read())
         
         #Create the mapPreviewScene
-        self.ui.mapPreviewScene = render_scene.MapPreviewScene(self.mapBackgroundImage, mapWallmaskImage, self.renderingEntityList, self)
+        self.ui.mapPreviewScene = render_scene.MapPreviewScene(self.mapBackgroundImage, mapWallmaskImage, self.renderingEntityList, self.redundentEntityList, self)
         self.ui.verticalLayout.addWidget(self.ui.mapPreviewScene.views()[0])
         
         #Create the Entity Grid
@@ -69,10 +71,14 @@ class MyForm(QtGui.QMainWindow):
         
         self.wallmaskVisible = True
         self.backgroundVisible = True
-        self.entitiesVisible = True
+        self.redundentEntitiesVisible = True
+        self.basicEntitiesVisible = True
+        
         self.ui.actionWallmask.triggered.connect(self.toggle_wallmask_visibility)
         self.ui.actionBackground.triggered.connect(self.toggle_background_visibility)
-        self.ui.actionEntities.triggered.connect(self.toggle_entity_visibility)
+        self.ui.actionBasicEntities.triggered.connect(self.toggle_basic_entity_visibility)
+        self.ui.actionRedundentEnt.triggered.connect(self.toggle_redundent_entity_visibility)
+        
         #Load all the json files in constants.GAMEMOES_PATH
         self.gamemodeList = []
         for gamemode in(glob.glob( os.path.join(constants.GAMEMODES_PATH, '*.json'))):
@@ -81,17 +87,17 @@ class MyForm(QtGui.QMainWindow):
         
         #load the json file and handle it, default the current one
         self.load_gamemode(os.path.join(constants.GAMEMODES_PATH , str(self.gamemodeSelector.currentText()) + ".json"))
-    
+
         #Timer for refreshing the painter object
         #self.ui.constantProgress = 0
         #self.timer = QtCore.QTimer()
-        #self.timer.start(16)
+        #self.timer.start(0)
         #QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.repaint_painter)
         
     def load_map (self, mapDirectory):
         #We create a QImage in order to fetch map information
         #Note that the ImageQt module actually breaks on windows for some reason, so we'll just use the temp image
-        entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), False)
+        entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), True)
         mapWallmask = QtGui.QImage(os.path.join(self.tempDirectory,"wallmask.png"))
         mapBackground = QtGui.QImage(self.mapDirectory)
         return (mapWallmask.width(), mapWallmask.height(), mapBackground, mapWallmask, entities)
@@ -140,34 +146,30 @@ class MyForm(QtGui.QMainWindow):
     def show_wizard(self):
         self.mapWizard = wizard.MapWizard()
         #self.mapWizard.FinishButton.setAutoDefault (False)
-    def repaint_painter(self):
-        if abs(self.ui.mapPreview.hspeed + self.ui.mapPreview.vspeed) > 0.01 or self.ui.mapPreview.keyByteSequence != 0x0:
-            self.ui.mapPreview.renderingEntityList = self.renderingEntityList
-            self.ui.mapPreview.repaint()
     def toggle_wallmask_visibility(self):
         if self.ui.actionWallmask.isChecked():
             self.wallmaskVisible = True
-            if not self.backgroundVisible:
-                self.ui.mapPreview.setAutoFillBackground(False)
         else:
             self.wallmaskVisible = False
-    def toggle_entity_visibility(self):
-        if self.ui.actionEntities.isChecked():
-            self.entitiesVisible = True
+        self.ui.mapPreviewScene.changeVisiblity()
+    def toggle_basic_entity_visibility(self):
+        if self.ui.actionBasicEntities.isChecked():
+            self.basicEntitiesVisible = True
         else:
-            self.entitiesVisible = False
+            self.basicEntitiesVisible = False
+        self.ui.mapPreviewScene.changeVisiblity()
+    def toggle_redundent_entity_visibility(self):
+        if self.ui.actionRedundentEnt.isChecked():
+            self.redundentEntitiesVisible = True
+        else:
+            self.redundentEntitiesVisible = False
+        self.ui.mapPreviewScene.changeVisiblity()
     def toggle_background_visibility(self):
         if self.ui.actionBackground.isChecked():
             self.backgroundVisible = True
-            palette = QtGui.QPalette()
-            palette.setColor(QtGui.QPalette.Background, QtCore.Qt.black);
-            self.ui.mapPreview.setPalette(palette);
-            self.ui.mapPreview.setAutoFillBackground(True)
         else:
             self.backgroundVisible = False
-            if self.wallmaskVisible:
-                self.ui.mapPreview.setAutoFillBackground(False)
-                
+        self.ui.mapPreviewScene.changeVisiblity()
 
     def createMapEntPixmap(self, entityFileName):
         #Memoized for speed
@@ -179,7 +181,7 @@ class MyForm(QtGui.QMainWindow):
         xOffset = int(self.legacyEntityDict[entityFileName]["mapImageOrigin"]["x"])
         yOffset = int(self.legacyEntityDict[entityFileName]["mapImageOrigin"]["y"])
         pixmap = QtGui.QPixmap.fromImage(image)
-        return(pixmap, (xOffset,yOffset))
+        return(pixmap, (xOffset,yOffset), entityFileName)
 class EntityButtonLabel (QtGui.QLabel):
     def __init__(self, attributes, myForm, parent=None):
         QtGui.QLabel.__init__(self, parent)

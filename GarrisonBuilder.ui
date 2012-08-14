@@ -84,9 +84,24 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menuEntities">
+     <property name="geometry">
+      <rect>
+       <x>412</x>
+       <y>173</y>
+       <width>159</width>
+       <height>94</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Entities</string>
+     </property>
+     <addaction name="actionBasicEntities"/>
+     <addaction name="actionRedundentEnt"/>
+    </widget>
     <addaction name="actionBackground"/>
     <addaction name="actionWallmask"/>
-    <addaction name="actionEntities"/>
+    <addaction name="menuEntities"/>
    </widget>
    <widget class="QMenu" name="menuMacros">
     <property name="title">
@@ -172,17 +187,6 @@
     <string>Wallmask</string>
    </property>
   </action>
-  <action name="actionEntities">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Entities</string>
-   </property>
-  </action>
   <action name="actionMirror_Entities">
    <property name="text">
     <string>Mirror Entities</string>
@@ -205,6 +209,33 @@
    </property>
    <property name="text">
     <string>Background</string>
+   </property>
+  </action>
+  <action name="actionRedundentEntities">
+   <property name="text">
+    <string>Redundent Entities</string>
+   </property>
+  </action>
+  <action name="actionRedundentEnt">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Redundent Entities</string>
+   </property>
+  </action>
+  <action name="actionBasicEntities">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Basic Entities</string>
    </property>
   </action>
  </widget>
