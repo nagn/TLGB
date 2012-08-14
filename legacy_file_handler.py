@@ -31,7 +31,7 @@ def decodeEntityData(entityList):
     entities = []
     for i in range(0, len(entityList), 3):
         #Create a list of the corresponding arguments, and append it to the list
-        entities.append([entityList[i],[entityList[i+1],entityList[i+2]]])
+        entities.append([entityList[i],(int(entityList[i+1]),int(entityList[i+2]))])
     return (entities)
 def getWallmaskData(filename):
     mapPNG = Image.open(filename)

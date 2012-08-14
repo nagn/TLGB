@@ -16,8 +16,8 @@ class MapPreviewScene(QtGui.QGraphicsScene):
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         
         for iteration in range(len(self.renderingList)):
-            x = self.renderingList[iteration][1][0]
-            y = self.renderingList[iteration][1][1]
+            x, y = self.renderingList[iteration][1]
+            xOffset, yOffset = self.renderingList[iteration][2]
             #The QGraphicsItem added will default to 0,0 for its coordinates. We should override it.
             entity = self.addPixmap(self.renderingList[iteration][0])
             #reverse the transformations that scaling the view does for the entities
@@ -26,7 +26,10 @@ class MapPreviewScene(QtGui.QGraphicsScene):
             entity.setTransform(viewTransform[0])
             entity.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
             entity.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-            entity.setOffset(x,y)
+            #entity.setPos (xOffset, yOffset)
+            #print(entity.mapToScene(x,y))
+            entity.setPos(entity.mapToScene(x,y))
+            entity.setOffset(xOffset, yOffset)
             entity.setOpacity(0.75)
     def updateScene(self):
         pass
@@ -88,8 +91,6 @@ class MapPreview(QtGui.QWidget):
         for iteration in range(len(self.renderingList)):
             x = self.renderingList[iteration][1][0]
             y = self.renderingList[iteration][1][1]
-            #if x > self.x and x < self.x + self.frameSize().width() -10:
-                #basic culling
             qp.drawPixmap(QtCore.QPoint(x, y), self.renderingList[iteration][0])
     def drawPixmaps(self, event, qp):
         #Handle scrolling

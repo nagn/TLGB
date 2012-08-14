@@ -41,8 +41,9 @@ class MyForm(QtGui.QMainWindow):
         self.cachedEntities = {}
         self.renderingEntityList = []
         for iteration in range(len(entities)):
-            x, y =  (int(float(entities[iteration][1][0])), int(float(entities[iteration][1][1])))
-            self.renderingEntityList.append([self.createMapEntPixmap(entities[iteration][0]), [x,y]])
+            x, y =  entities[iteration][1]
+            mapEntityPixmap , (xOffset, yOffset) = self.createMapEntPixmap(entities[iteration][0])
+            self.renderingEntityList.append((mapEntityPixmap, (x,y), (-xOffset, -yOffset)))
         
         #Create the mapPreviewScene
         self.ui.mapPreviewScene = render_scene.MapPreviewScene(self.mapBackgroundImage, mapWallmaskImage, self.renderingEntityList, self)
@@ -175,8 +176,11 @@ class MyForm(QtGui.QMainWindow):
             self.cachedEntities[entityFileName] = self.returnMapEntPixmap(entityFileName)
         return self.cachedEntities[entityFileName]
     def returnMapEntPixmap(self, entityFileName):
-        pixmap = QtGui.QPixmap(os.path.join(self.legacyEntityDict[entityFileName],"image 0.png"))
-        return(pixmap)
+        image = QtGui.QImage(os.path.join(self.legacyEntityDict[entityFileName]["filename"],"image 0.png"))
+        xOffset = int(self.legacyEntityDict[entityFileName]["mapImageOrigin"]["x"])
+        yOffset = int(self.legacyEntityDict[entityFileName]["mapImageOrigin"]["y"])
+        pixmap = QtGui.QPixmap.fromImage(image)
+        return(pixmap, (xOffset,yOffset))
 class EntityButtonLabel (QtGui.QLabel):
     def __init__(self, attributes, myForm, parent=None):
         QtGui.QLabel.__init__(self, parent)
