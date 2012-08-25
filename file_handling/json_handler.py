@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import os, sys
 import json
-import default_types
+import config.default_types as default_types
 
 
 def load_entities(entityTypePath):
@@ -22,7 +22,6 @@ def load_gamemode(entityTypePath):
     return(entities)
 
 def generate_all_entities():
-    
     entityList = []
     entityDict = default_types.return_entity_types()
     

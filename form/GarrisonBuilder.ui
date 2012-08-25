@@ -68,6 +68,7 @@
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
+    <addaction name="actionCompile"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
@@ -97,7 +98,7 @@
       <string>Entities</string>
      </property>
      <addaction name="actionBasicEntities"/>
-     <addaction name="actionRedundentEnt"/>
+     <addaction name="actionRedundantEnt"/>
     </widget>
     <addaction name="actionBackground"/>
     <addaction name="actionWallmask"/>
@@ -126,11 +127,17 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
   </action>
   <action name="actionSave_As">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save As...</string>
    </property>
@@ -161,6 +168,9 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -169,6 +179,9 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -188,6 +201,9 @@
    </property>
   </action>
   <action name="actionMirror_Entities">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Mirror Entities</string>
    </property>
@@ -216,7 +232,7 @@
     <string>Redundent Entities</string>
    </property>
   </action>
-  <action name="actionRedundentEnt">
+  <action name="actionRedundantEnt">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -224,7 +240,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Redundent Entities</string>
+    <string>Redundant Entities</string>
    </property>
   </action>
   <action name="actionBasicEntities">
@@ -236,6 +252,11 @@
    </property>
    <property name="text">
     <string>Basic Entities</string>
+   </property>
+  </action>
+  <action name="actionCompile">
+   <property name="text">
+    <string>Compile</string>
    </property>
   </action>
  </widget>

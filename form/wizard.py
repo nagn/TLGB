@@ -20,6 +20,7 @@ class IntroPage (QtGui.QWizardPage):
         layout = QtGui.QVBoxLayout()
         layout.addWidget(label)
         self.setLayout(layout)
+
 class SettingsPage (QtGui.QWizardPage):
     def __init__ (self, parent=None):
         super(SettingsPage, self).__init__()
