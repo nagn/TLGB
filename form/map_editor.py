@@ -18,7 +18,7 @@ class MyForm(QtGui.QMainWindow):
         self.directory = sys.path[0]
         self.mapDirectory = os.path.join(self.directory , "sprites/floaton/cp_floaton.png")
         self.tempDirectory = tempfile.mkdtemp()
-        
+        self.mapBackgroundImage, self.mapWallmaskImage = None, None
         #Load the default configuration (All entity types)
         self.entityTypes = json_handler.generate_all_entities()
         
@@ -31,21 +31,14 @@ class MyForm(QtGui.QMainWindow):
         self.ui.verticalLayoutEntity.addWidget(self.ui.entityScrollArea)
         
         self.mapZoomLevel = 6
-        #Load Map, and grab the map data
-        self.mapWidth, self.mapHeight, self.mapBackgroundImage, mapWallmaskImage, entities = self.loadMap(self.mapDirectory)
+        
         
         self.legacyEntityDict = json.loads(open("config/legacy_types.json").read())
-        self.cachedEntities = {}
-        self.renderingEntityList = []
-        for iteration in range(len(entities)):
-            x, y =  entities[iteration][1]
-            mapEntityPixmap , (xOffset, yOffset), entityName = self.createMapEntPixmap(entities[iteration][0])
-            self.renderingEntityList.append((mapEntityPixmap, (x,y), (-xOffset, -yOffset), entityName))
         #these are a list of entities to be ignored while that option is toggled
         self.redundantEntityList = json.loads(open("config/redundant_legacy_types.json").read())
         
         #Create the mapPreviewScene
-        self.ui.mapPreviewScene = MapPreviewScene(self.mapBackgroundImage, mapWallmaskImage, self.renderingEntityList, self.redundantEntityList, self)
+        self.ui.mapPreviewScene = MapPreviewScene(self.redundantEntityList, self)
         self.ui.verticalLayout.addWidget(self.ui.mapPreviewScene.views()[0])
         
         #Create the Entity Grid
@@ -59,7 +52,7 @@ class MyForm(QtGui.QMainWindow):
         
         #Generate the ToolBar
         self.addToolbar('icons\gb\icon_new.png', 'New', self.newMap, QtGui.QKeySequence.New)
-        self.addToolbar('icons\gb\open.png', 'Open', None, QtGui.QKeySequence.Open)
+        self.addToolbar('icons\gb\open.png', 'Open', self.loadMap, QtGui.QKeySequence.Open)
         self.addToolbar('icons\gb\save.png', 'Save', None, QtGui.QKeySequence.Save)
         self.addToolbar('icons\gb\delete.png', 'Exit', QtGui.qApp.quit, QtGui.QKeySequence.Quit)
         self.addToolbar('icons\gb\shrink.png', 'Zoom Out', self.scaleDown, QtGui.QKeySequence.ZoomOut)
@@ -85,13 +78,30 @@ class MyForm(QtGui.QMainWindow):
         #load the json file and handle it, default the current one
         self.loadGamemode(os.path.join(settings.GAMEMODES_PATH , str(self.gamemodeSelector.currentText()) + ".json"))
         
+        self.cachedEntities = {}
     def loadMap (self, mapDirectory):
-        #We create a QImage in order to fetch map information
-        #Note that the ImageQt module actually breaks on windows for some reason, so we'll just use the temp image
-        entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), True)
-        mapWallmask = QtGui.QImage(os.path.join(self.tempDirectory,"wallmask.png"))
-        mapBackground = QtGui.QImage(self.mapDirectory)
-        return (mapWallmask.width(), mapWallmask.height(), mapBackground, mapWallmask, entities)
+        #Load Map, and grab the map data
+        self.mapBackground = None
+        self.mapWallmask = None
+        self.mapEntities = None
+        entities = []
+        self.renderingEntityList = []
+        self.mapDirectory = QtGui.QFileDialog.getOpenFileName(
+           filter = "PNG (*.png)"
+        )
+        if self.mapDirectory != "":
+            try:
+                entities, wallmask = legacy.extractLevelData(self.mapDirectory, os.path.join(self.tempDirectory,"wallmask.png"), True)
+                self.mapWallmask = QtGui.QImage(os.path.join(self.tempDirectory,"wallmask.png"))
+                self.mapBackground = QtGui.QImage(self.mapDirectory)
+                for iteration in range(len(entities)):
+                    x, y =  entities[iteration][1]
+                    mapEntityPixmap , (xOffset, yOffset), entityName = self.createMapEntPixmap(entities[iteration][0])
+                    self.renderingEntityList.append((mapEntityPixmap, (x,y), (-xOffset, -yOffset), entityName))
+            except legacy.NoData:
+                #As there is no leveldata, only load the background
+                self.mapBackground = QtGui.QImage(self.mapDirectory)
+        self.ui.mapPreviewScene.loadMap(self.mapBackground, self.mapWallmask, self.renderingEntityList)
     def loadGamemode(self, gamemodePath):
         gamemodeConfig = json_handler.load_gamemode(os.path.join(sys.path[0],gamemodePath))
         gamemodeCategories = gamemodeConfig['categories']
@@ -173,4 +183,3 @@ class MyForm(QtGui.QMainWindow):
         yOffset = int(self.legacyEntityDict[entityFileName]["mapImageOrigin"]["y"])
         pixmap = QtGui.QPixmap.fromImage(image)
         return(pixmap, (xOffset,yOffset), entityFileName)
-

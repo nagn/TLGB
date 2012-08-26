@@ -3,18 +3,26 @@ from __future__ import division, print_function
 import re
 import Image, PngImagePlugin
 import os, sys
-
+"""
+What could possibly go wrong?
+"""
+class NoData(Exception):
+    pass
+class NoEntities(Exception):
+    pass
+class NoMask(Exception):
+    pass
 GANG_GARRISON_LEVEL_DATA = "Gang Garrison 2 Level Data"
 START_WALLMASK_TAG = "{WALKMASK}"
 END_WALLMASK_TAG = "{END WALKMASK}"
 START_ENTITY_TAG = "{ENTITIES}"
 END_ENTITY_TAG = "{END ENTITIES}"
 def decompressEntityData(filename):
-    mapPNG = Image.open(filename)
+    mapPNG = Image.open(str(filename))
     try :
         levelData = str(mapPNG.info['Gang Garrison 2 Level Data'])
     except KeyError:
-        raise Exception("No Level Data Found in " + str(filename))
+        raise NoData("No Level Data Found in " + str(filename))
     del mapPNG
     if re.search(START_ENTITY_TAG+'\n(.*)\n'+END_ENTITY_TAG, levelData, re.DOTALL):
         #We include the newline tags to make sure that we get rid of them
@@ -25,7 +33,7 @@ def decompressEntityData(filename):
         #return a list containing all the entities
         return(decodeEntityData(values))
     else:
-        raise Exception("ENTITY DATA NOT FOUND IN " + str(filename))
+        raise NoEntities("ENTITY DATA NOT FOUND IN " + str(filename))
 
 def decodeEntityData(entityList):
     entities = []
@@ -34,18 +42,18 @@ def decodeEntityData(entityList):
         entities.append([entityList[i],(int(entityList[i+1]),int(entityList[i+2]))])
     return (entities)
 def getWallmaskData(filename):
-    mapPNG = Image.open(filename)
+    mapPNG = Image.open(str(filename))
     levelData = str(mapPNG.info['Gang Garrison 2 Level Data'])
     rawWallmaskData = re.search(START_WALLMASK_TAG+'\n(.*)\n'+END_WALLMASK_TAG, levelData, re.DOTALL).group(1)
     del mapPNG
     return(rawWallmaskData)
     
 def decompressWallmaskData(filename, outputWallmaskName, transparentOutput):
-    mapPNG = Image.open(filename)
+    mapPNG = Image.open(str(filename))
     try :
-        levelData = str(mapPNG.info['Gang Garrison 2 Level Data'])
+        levelData = mapPNG.info['Gang Garrison 2 Level Data']
     except KeyError:
-        raise Exception("No Level Data Found in " + str(filename))
+        raise NoData("No Level Data Found in " + str(filename))
     del mapPNG
     if re.search(START_WALLMASK_TAG+'\n(.*)\n'+END_WALLMASK_TAG, levelData, re.DOTALL):
         rawWallmaskData = re.search(START_WALLMASK_TAG+'\n(.*)\n'+END_WALLMASK_TAG, levelData, re.DOTALL).group(1)
@@ -81,7 +89,7 @@ def decompressWallmaskData(filename, outputWallmaskName, transparentOutput):
             img.save(outputWallmaskName, 'png')
         return(img)
     else:
-        raise Exception("WALLMASK DATA NOT FOUND IN " + str(filename))
+        raise NoMask("WALLMASK DATA NOT FOUND IN " + str(filename))
 def memoize(f):
     cache= {}
     def memf(*x):
@@ -116,7 +124,7 @@ def compressEntityData(entityList):
     return(START_ENTITY_TAG + chr(10) + entityString + END_ENTITY_TAG)
 def compressWallmaskData(wallmaskFilename):
     #this function takes a black and white PNG wallmask and compiles the corresponding character sequence from it
-    wallmask = Image.open(wallmaskFilename)
+    wallmask = Image.open(str(wallmaskFilename))
     #convert to a black and white image
     bw = wallmask.convert('L')
     width, height = bw.size
@@ -148,7 +156,7 @@ def convertPixels(pixelSlice):
     return(chr(char + 32))
 
 def embedLevelData(backgroundImage, entityList, wallmaskImage):
-    mapPNG = Image.open(backgroundImage)
+    mapPNG = Image.open(str(backgroundImage))
     mapPNG.info[GANG_GARRISON_LEVEL_DATA] = compressEntityData(entityList) + compressWallmaskData(wallmaskImage)
     pngsave(mapPNG, backgroundImage)
     

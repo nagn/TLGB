@@ -89,44 +89,58 @@ class GamemodeSelector(QtGui.QComboBox):
     def changedMode(self):
         currentText = str(self.currentText())
         self.form.loadGamemode(os.path.join(settings.GAMEMODES_PATH , currentText + ".json"))
-        
+class MapEntityItem(QtGui.QGraphicsPixmapItem):
+    def __init__(self, parent=None):
+        super(MapEntityItem, self).__init__(parent)
+    def itemChange(self, change, value):
+        if change == QtGui.QGraphicsPixmapItem.ItemPositionChange:
+            #Truntcate the position, we want to snap to grid
+            return(value.toPoint())
+        return (value)
 class MapPreviewScene(QtGui.QGraphicsScene):
-    def __init__(self, backgroundImage, wallmaskImage, renderingList, redundantLegacyList, form, parent=None):
+    def __init__(self, redundantLegacyList, form, parent=None):
         super(MapPreviewScene, self).__init__(parent)
-        
-        self.backgroundImage = backgroundImage
-        self.background = self.addPixmap(QtGui.QPixmap(backgroundImage))
-        self.background.setZValue(-2)
-        
-        #self.wallmaskImage = wallmaskImage
-        self.wallmask = self.addPixmap(QtGui.QPixmap(wallmaskImage))
-        self.wallmask.setZValue(-1)
         QtCore.QObject.connect(self, QtCore.SIGNAL("changed(QList<QRectF>)"), self.updateScene)
+        self.addText("Too Late Garrison Builder Version %s \n Original Content. Do Not Steal. \n Please Load a Map" % (settings.VERSION_NUMBER))
         self.form = form
-        self.renderingList = renderingList
+        self.redundantLegacyList = redundantLegacyList
+        #pass ourself to the constructor
         self.view = QtGui.QGraphicsView(self)
         self.view.scale(self.form.mapZoomLevel,self.form.mapZoomLevel)
         self.view.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.view.setMouseTracking(True)
-        for renderedEntity in self.renderingList:
-            x, y = renderedEntity[1]
-            xOffset, yOffset = renderedEntity[2]
-            #The QGraphicsItem added will default to 0,0 for its coordinates. We should override it.
-            entity = self.addPixmap(renderedEntity[0])
-            #reverse the transformations that scaling the view does for the entities
-            viewTransform = self.view.transform().inverted()
-            #The boolean result is the second part of the tuple. We don't care if we're passing the identity or not, so here
-            entity.setTransform(viewTransform[0])
-            entity.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-            entity.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-            entity.setPos(entity.mapToScene(x,y))
-            entity.setOffset(xOffset, yOffset)
-            entity.setOpacity(0.65)
-            #Special attributes we set for the sake of sorting
-            entity.setData(0, renderedEntity[3])
-            entity.setZValue(1)
-            entity.setToolTip(renderedEntity[3])
-        self.redundantLegacyList = redundantLegacyList
+    def loadMap(self, backgroundImage, wallmaskImage, renderingList):
+        self.clear()
+        self.backgroundImage = backgroundImage
+        self.background = self.addPixmap(QtGui.QPixmap(backgroundImage))
+        self.background.setZValue(-2)
+        self.wallmask = self.addPixmap(QtGui.QPixmap(wallmaskImage))
+        self.wallmask.setZValue(-1)
+
+        self.renderingList = renderingList
+        if len(self.renderingList) != 0:
+            for renderedEntity in self.renderingList:
+                x, y = renderedEntity[1]
+                xOffset, yOffset = renderedEntity[2]
+                #The QGraphicsItem added will default to 0,0 for its coordinates. We should override it.
+                entity = MapEntityItem()
+                entity.setPixmap(renderedEntity[0])
+                #entity = self.addPixmap(renderedEntity[0])
+                #reverse the transformations that scaling the view does for the entities
+                viewTransform = self.view.transform().inverted()
+                #The boolean result is the second part of the tuple. We don't care if we're passing the identity or not, so here
+                entity.setTransform(viewTransform[0])
+                entity.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+                entity.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+                entity.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+                entity.setPos(entity.mapToScene(x,y))
+                entity.setOffset(xOffset, yOffset)
+                entity.setOpacity(0.65)
+                #Special attributes we set for the sake of sorting
+                entity.setData(0, renderedEntity[3])
+                entity.setZValue(1)
+                entity.setToolTip(renderedEntity[3])
+                self.addItem(entity)
     def updateScene(self):
         pass
     def changeVisiblity(self):
